@@ -11,7 +11,7 @@ Google Apps Shell makes it simple to programmatically issue commands to your Goo
   * Changing every user's signature to a custom signature including their email address.
   * Moving every user from one domain to another, then removing the old user alias.
   * Creating resource calendars from a CSV file containing calendar resource information.
-  * ...and any other interesting combination of GAM commands.
+  * ...and any other interesting combination of Google Apps API commands.
 
 = Download =
 
