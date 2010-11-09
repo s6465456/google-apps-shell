@@ -12,3 +12,12 @@ Google Apps Shell makes it simple to programmatically issue commands to your Goo
   * Moving every user from one domain to another, then removing the old user alias.
   * Creating resource calendars from a CSV file containing calendar resource information.
   * ...and any other interesting combination of GAM commands.
+
+= Download =
+
+
+
+= Install =
+
+
+= Usage =
