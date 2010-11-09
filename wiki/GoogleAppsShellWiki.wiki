@@ -1,0 +1,14 @@
+#summary The main page for the Google Apps Shell wiki.
+
+= Introduction =
+
+Google Apps Shell is a graphical user interface designed to simplify use of the Google Apps related APIs.
+
+
+= Details =
+
+Google Apps Shell makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager] without having to write a bash script.  Some use cases include:
+  * Changing every user's signature to a custom signature including their email address.
+  * Moving every user from one domain to another, then removing the old user alias.
+  * Creating resource calendars from a CSV file containing calendar resource information.
+  * ...and any other interesting combination of GAM commands.
