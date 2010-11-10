@@ -2,12 +2,12 @@
 
 = Introduction =
 
-Google Apps Shell is a graphical user interface designed to simplify use of the Google Apps related APIs.
+Google Apps Shell (GAS) is a graphical user interface designed to simplify use of the Google Apps related APIs.
 
 
 = Details =
 
-Google Apps Shell makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager] without having to write a bash script.  Some use cases include:
+Google Apps Shell makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager] (GAM) without having to write a bash script.  Some use cases include:
   * Changing every user's signature to a custom signature including their email address.
   * Moving every user from one domain to another, then removing the old user alias.
   * Creating resource calendars from a CSV file containing calendar resource information.
@@ -36,7 +36,7 @@ If you are not sure if you have Python installed, try running the command "pytho
 
 First, you will have to authenticate to Google Apps.  Enter an administrative username (admin@domain.com) and password and log in. If you have already logged in to GAS without logging out, you should already be logged in when GAS opens.
 
-GAS is built off of the open source project [https://code.google.com/p/google-apps-manager GAM], so all of the commands are from GAM.  To see what commands you can use, either visit the GAM website or click Open Documentation in GAS.
+GAS is built off of the open source project GAM, so all of the commands are from GAM 1.6.1.  To see what commands you can use, either visit the GAM website or click Open Documentation in GAS.
 
 To execute a command, type in the command and click Execute.
 
