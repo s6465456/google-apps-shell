@@ -22,7 +22,7 @@ For more information, see http://code.google.com/p/google-apps/manager/
 """
 
 __author__ = 'jlee@pbu.edu (Jay Lee)'
-__version__ = '1.6.1F1' # F for Forked
+__version__ = '1.6.1F1' # F for Forked, for use with GAS
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv, getpass
@@ -110,7 +110,7 @@ def getAppsObject(skipRawInput=False, newUsername='', newDomain='', newPasswd=''
       username = authfile.readline()[0:-1]
       passwd = authfile.readline()
     else:
-      if skipRawInput:
+      if skipRawInput or SKIP_USERNAME_PROMPT_IN_GAM:
         domain = newDomain
         username = newUsername
         passwd = newPasswd
