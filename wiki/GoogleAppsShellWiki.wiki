@@ -27,7 +27,6 @@ Installation is pretty straight-forward so long as you have Python installed.
   # Unzip gas.zip
   # Through a command line interface, navigate to the gas directory.
   # Execute a command to open gas.py with Python. This command is typically "python gas.py"
-  # GAS should open.
 
 
 = Usage =
