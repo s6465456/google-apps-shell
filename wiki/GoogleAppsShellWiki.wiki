@@ -13,11 +13,22 @@ Google Apps Shell makes it simple to programmatically issue commands to your Goo
   * Creating resource calendars from a CSV file containing calendar resource information.
   * ...and any other interesting combination of Google Apps API commands.
 
+
 = Download =
 
+To download the most recent version of Google Apps Shell, download gas.zip:
+[http://google-apps-shell.googlecode.com/svn/trunk/gas.zip Google Apps Shell zip]
 
 
 = Install =
+
+Installation is pretty straight-forward so long as you have Python installed.
+
+1. Download gas.zip
+2. Unzip gas.zip
+3. Through a command line interface, navigate to the gas directory.
+4. Execute a command to open gas.py with Python. This command is typically "python gas.py"
+5. GAS should open.
 
 
 = Usage =
