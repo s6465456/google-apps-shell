@@ -29,6 +29,8 @@ Installation is straightforward so long as you have Python installed.
   # Through a command line interface, navigate to the gas directory.
   # Execute a command to open gas.py with Python. This command is typically "python gas.py"
 
+If you are not sure if you have Python installed, try running the command "python gas.py" anyway.  If you don't have Python installed, you can get it at [http://www.python.org/ python.org].
+
 
 = Usage =
 
