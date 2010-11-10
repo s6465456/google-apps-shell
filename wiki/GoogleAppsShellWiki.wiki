@@ -23,7 +23,7 @@ To download the most recent version of Google Apps Shell, download gas.zip (you 
 
 = Install =
 
-Installation is pretty straight-forward so long as you have Python installed.
+Installation is straightforward so long as you have Python installed.
   # Download gas.zip
   # Unzip gas.zip
   # Through a command line interface, navigate to the gas directory.
