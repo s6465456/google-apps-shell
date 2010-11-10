@@ -6,8 +6,10 @@
 
 import sys
 import os
-from Tkinter import * # TODO(pickhardt) refactor this to simply import Tkinter
+from Tkinter import * # TODO(pickhardt) refactor this to simply "import Tkinter"
+SKIP_USERNAME_PROMPT_IN_GAM = True
 import gam
+SKIP_USERNAME_PROMPT_IN_GAM = False
 import gam_commands
 # Clean up gam_commands for proper use with this user interface library
 for entry in gam_commands.commands:
@@ -35,9 +37,9 @@ def PathFromCurrent(relative_path):
   return path+divider+relative_path
 
 class MyApp:
-  """TODO(pickhardt)"""
+  """MyApp is the container class for the entire user interface and application."""
   def __init__(self, parent):
-    """TODO(pickhardt)"""
+    """Creates the entire user interface for GAS, as well as initially logging the user in."""
     self.parent = parent
     self.parent.title("Google Apps Shell")
     
@@ -78,6 +80,15 @@ class MyApp:
       self.log_in_frame.pack()
   
   def MakeHelpFrame(self, parent_frame):
+    """Creates a help frame containing buttons for more information (to documentation and the project website).
+    
+    Args:
+      self: The object.
+      parent_frame: This frame is where the helper buttons are placed.
+      
+    Returns:
+      Nothing.
+    """
     self.current_help_command = ''
     
     self.help_button = Button(parent_frame, text="Open Documentation")
@@ -90,7 +101,7 @@ class MyApp:
     self.website_button.bind("<Button-1>", self.OpenProjectWebsite)
     self.website_button.bind("<Return>", self.OpenProjectWebsite)
   
-  def OpenProjectWebsite(self, event, url='http://code.google.com/p/google-apps-manager/'):
+  def OpenProjectWebsite(self, event, url='http://code.google.com/p/google-apps-shell/'):
     """Opens the project website.
     
     Args:
@@ -148,6 +159,14 @@ class MyApp:
     button.pack()
   
   def CopyHelpCommandToExecuteField(self):
+    """Copies the currently showing command from the help window to the execute field in the main window.
+    
+    Args:
+      self: The object.
+    
+    Returns:
+      Nothing.
+    """
     currentCommand = str(self.command_field.get())
     textToAdd = self.current_help_command
     if currentCommand:
@@ -156,8 +175,26 @@ class MyApp:
     self.command_field.focus_force()
   
   def HelpFunction(self, help_with):
+    """Pops up a help dialog, allowing the user to get extra help.
+    
+    Args:
+      self: The object.
+      help_with: The specific command to print help details about.
+    
+    Returns:
+      A function to get called associated with the specific command in GAM.
+    """
     help_object = gam_commands.commands[help_with]
     def HelpForGivenEntry():
+      """(This is a function inside a function)
+        Sets the help window display elements to the associated documentation for help_with.
+
+      Args:
+        None.
+
+      Returns:
+        Nothing.
+      """
       example_strings = ["  %s\n%s\n\n" % (example[0], example[1]) for example in help_object['examples']]
       full_example_string = "\n".join(example_strings)
       helpful_description_text = """
@@ -174,7 +211,7 @@ Examples:
     return HelpForGivenEntry
   
   def MakeExtraFrame(self, parent_frame):
-    """TODO(pickhardt)"""
+    """Makes the frame containing the master template container and the output container."""
     self.left_container = Frame(parent_frame, bd=30)
     self.left_container.pack(side=LEFT)
         
@@ -220,19 +257,14 @@ Examples:
     self.output_text = self.MakeTextFrame(self.right_container)
       
   def MakeHeaderFrame(self, parent_frame):
-    """TODO(pickhardt)"""
+    """Makes the frame containing the header."""
     big_font = tkFont.Font(family="Arial", size=24)
     
     label = Label(parent_frame, font=big_font, text='Google Apps Shell')
     label.pack()
-    
-    #photo = PhotoImage(file=PathFromCurrent("gam_logo.gif"))
-    #photo_label = Label(parent_frame, image=photo)
-    #photo_label.photo = photo
-    #photo_label.pack()
-  
+      
   def MakeErrorFrame(self, parent_frame):
-    """TODO(pickhardt)"""
+    """Makes the frame containing the error label. The error label gets updated when any execution status changes."""
     self.standard_error_label = Label(parent_frame, text='')
     self.standard_error_label.pack()
     
@@ -286,11 +318,10 @@ Examples:
     self.log_out_button.pack()
   
   def MakeCommandFrame(self, parent_frame):
-    """TODO(pickhardt)"""
+    """Builds the command frame, which contains the execute command field and button."""
     self.command_field = Entry(parent_frame, width=90, justify=CENTER)
     self.command_field.pack(side=LEFT)
     self.command_field.bind("<Return>", self.RunExecute)
-    #self.command_field.focus_force()
 
     self.execute_button = Button(parent_frame, text="Execute")
     self.execute_button.pack(side=RIGHT)
@@ -298,7 +329,7 @@ Examples:
     self.execute_button.bind("<Return>", self.RunExecute)
   
   def RunExecute(self, event):
-    """TODO(pickhardt)"""
+    """Executes the command."""
     master_template_lines = self.input_text.get(1.0,END)
     master_template_lines = master_template_lines.split("\n")
     master_template = []
@@ -311,7 +342,7 @@ Examples:
     self.RunCommands(commands, master_template)
   
   def RunCommands(self, commands, master_template=[]):
-    """TODO(pickhardt)"""
+    """Executes the command in the command field, or the commands using the master template."""
     if not master_template:
       master_template = ['']
     for template in master_template:
@@ -321,7 +352,6 @@ Examples:
         if not command:
           continue
         for index in range(len(mapping)):
-          #command = command.replace('\x00','') # no idea why this is happening...
           command = command.replace('{%d}' % (index+1), mapping[index].strip()) # Replace {i} with the value from the template.
         # Command now contains the right variables.
         # Execute it.
@@ -336,7 +366,7 @@ Examples:
           sys.stderr.write(e)
         
   def LoadInput(self, event):
-    """TODO(pickhardt)"""
+    """Loads an input to the input text from a file."""
     self.input_text.delete('1.0', END)
     try:
       with open(PathFromCurrent(self.input_from.get())) as input_file:
@@ -353,7 +383,7 @@ Examples:
     self.output_text.delete('1.0', END)
   
   def LogOut(self, event):
-    """TODO(pickhardt)"""
+    """Logs out and deletes the token file, if it exists."""
     # GAM specific code
     # delete token file
     token_file_path = gam.getTokenPath()
@@ -370,7 +400,7 @@ Examples:
     self.log_out_frame.pack_forget()
   
   def AutoLogIn(self):
-    """TODO(pickhardt)"""
+    """Logs in to Google Apps based on the credentials given in the apps object, which is assumed to work successfully."""
     apps = gam.getAppsObject()
     # if we get here, then we've successfully logged in
     self.log_out_label.configure(text='Currently signed in to '+apps.domain)
@@ -378,7 +408,7 @@ Examples:
     self.log_out_frame.pack()
   
   def LogIn(self, event):
-    """TODO(pickhardt)"""
+    """Logs in with the username and password supplied in the fields."""
     fullUsername = self.log_in_username.get()
     password = self.log_in_password.get()
     try:
@@ -393,21 +423,20 @@ Examples:
     self.log_in_password.configure(text='')
     self.log_in_frame.pack_forget()
     self.log_out_frame.pack()
+    sys.stderr.write('') # clears the status frame, in case there is anything there
   
   def WriteOutput(self, text):
-    """TODO(pickhardt) writes output."""
+    """Writes output."""
     try:
       with open(PathFromCurrent(self.output_to.get()), 'a') as output_file:
         output_file.write(text)
     except:
       pass
     self.output_text.insert(END, text)
-    #self.output_text.update()
   
   def WriteError(self, text):
     """Writes error output.""" # TODO
     self.standard_error_label.configure(text=text)
-    #self.standard_error_label.update()
 
   
 root = Tk()
@@ -436,8 +465,8 @@ class StdErr:
     self.app.WriteError(text)
     self.app.error_frame.update_idletasks()
 
-#std_err = StdErr(my_app)
-#sys.stderr = std_err
+std_err = StdErr(my_app)
+sys.stderr = std_err
 
 if __name__ == '__main__':
   root.mainloop()
