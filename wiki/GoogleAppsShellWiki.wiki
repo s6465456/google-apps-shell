@@ -30,3 +30,23 @@ Installation is pretty straight-forward so long as you have Python installed.
 
 
 = Usage =
+
+First, you will have to authenticate to Google Apps.  Enter an administrative username (admin@domain.com) and password and log in. If you have already logged in to GAS without logging out, you should already be logged in when GAS opens.
+
+GAS is built off of the open source project [https://code.google.com/p/google-apps-manager GAM], so all of the commands are from GAM.  To see what commands you can use, either visit the GAM website or click Open Documentation in GAS.
+
+To execute a command, type in the command and click Execute.
+
+GAS can execute custom commands generated from a CSV. To do so, first load a template CSV to the Master Template. Next, find the command you wish to use and enter it in the execution field. When executed, GAS will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
+
+For instance, if you load the template with a CSV containing "John, Lennon, jlennon\nAdrian, Peterson, apeterson", you could set their signatures with the command:
+
+user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"
+
+Executing this command would update both signatures.
+
+GAS can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
+
+multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"
+
+Executing this command would move the user's between multiple domains, as well as update their signature to reflect their new email address.
