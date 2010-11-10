@@ -1,6 +1,6 @@
-# gam-command-tree.yaml
+# gam-command-tree.py
 #
-#
+# Documentation for the GAM commands as of GAM 1.6.1
 commands = {
 
   'create user': {
