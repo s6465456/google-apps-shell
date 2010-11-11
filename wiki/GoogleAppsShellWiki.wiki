@@ -18,7 +18,7 @@ Google Apps Shell makes it simple to programmatically issue commands to your Goo
 
 To download the most recent version of Google Apps Shell, download gas.zip (you may have to right click and use Save As...):
 
-[http://google-apps-shell.googlecode.com/svn/trunk/gas.zip Google Apps Shell zip]
+[http://google-apps-shell.googlecode.com/svn/trunk/gas.zip (Right) click here to download gas.zip]
 
 
 = Install =
