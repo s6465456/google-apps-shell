@@ -44,12 +44,12 @@ GAS can execute custom commands generated from a CSV. To do so, first load a tem
 
 For instance, if you load the template with a CSV containing "John, Lennon, jlennon\nAdrian, Peterson, apeterson", you could set their signatures with the command:
 
-user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"
+{{{user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"}}}
 
 Executing this command would update both signatures.
 
 GAS can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
 
-multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"
+{{{multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"}}}
 
 Executing this command would move the user's between multiple domains, as well as update their signature to reflect their new email address.
