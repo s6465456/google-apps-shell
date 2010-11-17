@@ -34,7 +34,7 @@ If you are not sure if you have Python installed, try running the command "pytho
 
 = Usage =
 
-First, you will have to authenticate to Google Apps.  Enter an administrative username (admin@domain.com) and password and log in. If you have already logged in to GAS without logging out, you should already be logged in when GAS opens.
+First, you will have to authenticate to Google Apps.  To log in, enter an administrative username and password. If you have already logged in to GAS without logging out, you should already be logged in when GAS opens.
 
 GAS is built off of the open source project GAM, so all of the commands are from GAM 1.6.1.  To see what commands you can use, either visit the GAM website or click Open Documentation in GAS.
 
