@@ -389,22 +389,19 @@ Examples:
         # Command now contains the right variables.
         # Execute it.
         command_list = [entry for entry in shlex.split(command)]
-        
+        sys.stderr.write('Executing: '+command)
         engine = command_list[0].lower() # either 'gam' or 'gas'
-        
         if engine=='gam':
             sys.argv = [sys.argv[0]]
             sys.argv.extend(command_list[1:])
             try:
-              sys.stderr.write('Executing: '+command)
               gam.execute() # requires arguments passed as sys.argv
-              sys.stderr.write('Finished executing: '+command)
             except StandardError, e:
               sys.stderr.write(e)
         else:
-            pass
-            # assume they are using GAS?
-            # run command_list[1:] in gas
+            # assume they are using GAS
+            gas.execute(command_list[1:])
+        sys.stderr.write('Finished executing: '+command)
         
   def LoadInput(self, event):
     """Loads an input to the input text from a file."""
@@ -523,8 +520,8 @@ class StdErr:
     self.app.WriteError(text)
     self.app.error_frame.update_idletasks()
 
-#std_err = StdErr(my_app)
-#sys.stderr = std_err
+std_err = StdErr(my_app)
+sys.stderr = std_err
 
 if __name__ == '__main__':
   root.mainloop()
