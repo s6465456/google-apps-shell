@@ -39,11 +39,11 @@ If you are not sure if you have Python installed, try running the command "pytho
 
 First, you will have to authenticate to Google Apps.  To log in, enter an administrative username and password. If you have already logged in to GAS without logging out, you should already be logged in when GAS opens.
 
-GAS is built off of the open source project GAM, so all of the commands are from GAM 1.6.1.  To see what commands you can use, either visit the GAM website or click Open Documentation in GAS.
+The graphical user interface GASI can call functions from both GAS and GAM (version 1.6.1).  To see what commands you can use, either visit the GAM website or click Open Documentation in GAS.
 
 To execute a command, type in the command and click Execute.
 
-GAS can execute custom commands generated from a CSV. To do so, first load a template CSV to the Master Template. Next, find the command you wish to use and enter it in the execution field. When executed, GAS will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
+GAS can execute custom commands generated from a CSV. To do so, first load a template CSV to the Master Template. Next, find the command you wish to use and enter it in the execution field. When executed, GASI will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
 
 For instance, if you load the template with a CSV containing "John, Lennon, jlennon\nAdrian, Peterson, apeterson", you could set their signatures with the command:
 
@@ -51,7 +51,7 @@ For instance, if you load the template with a CSV containing "John, Lennon, jlen
 
 Executing this command would update both signatures.
 
-GAS can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
+GASI can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
 
 {{{gam multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"}}}
 
