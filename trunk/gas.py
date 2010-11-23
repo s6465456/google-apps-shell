@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 #
 # Google Apps Shell
 #
@@ -14,475 +14,432 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Google Apps Shell is a graphical user interface designed to simplify use of the Google Apps related APIs."""
+"""Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
 __version__ = '0.2.0'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
-import sys
-import os
-from Tkinter import * # TODO(pickhardt) refactor this to simply "import Tkinter"
-SKIP_USERNAME_PROMPT_IN_GAM = True
-import gam
-SKIP_USERNAME_PROMPT_IN_GAM = False
-import gam_commands
-# Clean up gam_commands for proper use with this user interface library
-for entry in gam_commands.commands:
-  if gam_commands.commands[entry]['usage'][0:4] == 'gam ':
-    gam_commands.commands[entry]['usage'] = gam_commands.commands[entry]['usage'][4:]
-import shlex
-import time
-import tkFont
-import webbrowser
+import sys, os, time, datetime, random, cgi, socket, urllib, csv
+from sys import exit
+import gdata.apps.service
+import gdata.apps.emailsettings.service
+import gdata.apps.adminsettings.service
+import gdata.apps.groups.service
+import gdata.apps.audit.service
+import gdata.apps.multidomain.service
+import gdata.apps.orgs.service
+import gdata.apps.res_cal.service
+from hashlib import sha1
+import getpass
 
-def PathFromCurrent(relative_path):
-  """Returns the operating system absolute path to a given relative path, from the current directory.
-  
-  Args:
-    relative_path: the relative path to append to the current directory.
-    
-  Returns:
-    This function returns the operating system absolute path to a given relative path, from the current directory.
-  """
-  path = os.path.dirname(os.path.abspath(sys.argv[0]))
-  if os.path.abspath('/') != -1:
-    divider = '/'
-  else:
-    divider = '\\'
-  return path+divider+relative_path
 
-class MyApp:
-  """MyApp is the container class for the entire user interface and application."""
-  def __init__(self, parent):
-    """Creates the entire user interface for GAS, as well as initially logging the user in."""
-    self.parent = parent
-    self.parent.title("Google Apps Shell")
-    
-    # build header frame
-    self.header_frame = Frame(parent)
-    self.header_frame.pack()
-    self.MakeHeaderFrame(self.header_frame)
-    
-    # build help frame
-    self.help_frame = Frame(parent)
-    self.help_frame.pack()
-    self.MakeHelpFrame(self.help_frame)
-    
-    # build credential frame
-    self.credential_frame = Frame(parent, pady=40)
-    self.credential_frame.pack()
-    self.MakeCredentialFrame(self.credential_frame)
-    
-    # build command line frame
-    self.command_frame = Frame(parent)
-    self.command_frame.pack()
-    self.MakeCommandFrame(self.command_frame)
-    
-    # build error frame
-    self.error_frame = Frame(parent)
-    self.error_frame.pack()
-    self.MakeErrorFrame(self.error_frame)
-    
-    # build input/outputs
-    self.extra_frame = Frame(parent)
-    self.extra_frame.pack()
-    self.MakeExtraFrame(self.extra_frame)
-    
-    # try to auto log in
-    try:
-      self.AutoLogIn()
-    except:
-      self.log_in_frame.pack()
-  
-  def MakeHelpFrame(self, parent_frame):
-    """Creates a help frame containing buttons for more information (to documentation and the project website).
-    
-    Args:
-      self: The object.
-      parent_frame: This frame is where the helper buttons are placed.
-      
-    Returns:
-      Nothing.
-    """
-    self.current_help_command = ''
-    
-    self.help_button = Button(parent_frame, text="Open Documentation")
-    self.help_button.pack(side=LEFT)
-    self.help_button.bind("<Button-1>", self.PopHelp)
-    self.help_button.bind("<Return>", self.PopHelp)
-    
-    self.website_button = Button(parent_frame, text="Open Website")
-    self.website_button.pack(side=LEFT)
-    self.website_button.bind("<Button-1>", self.OpenProjectWebsite)
-    self.website_button.bind("<Return>", self.OpenProjectWebsite)
-  
-  def OpenProjectWebsite(self, event, url='http://code.google.com/p/google-apps-shell/'):
-    """Opens the project website.
-    
-    Args:
-      self: The object.
-      event: The event calling this method.
-      url: The url of the project website.
-    
-    Returns:
-      Nothing.
-    """
-    webbrowser.open(url)
-    
-  def PopHelp(self, event, total_width=600):
-    """Pops up a help dialog, allowing the user to get extra help.
-    
-    Args:
-      self: The object.
-      event: The event calling this method.
-    
-    Returns:
-      Nothing.
-    """
-    helper_frame = Toplevel(width=total_width)
-    helper_frame.title("Help")
+## CREDENTIALS / AUTHENTICATION RELATED STUFF ##
+class Credentials:
+    def __init__(self, email='', password=''):
+        """Comments"""
         
-    label = Label(helper_frame, text="Help")
-    label.pack()
-    
-    help_menu_list = []
-    for entry in gam_commands.commands:
-      if entry!='_TEMPLATE':
-        if 'category' in gam_commands.commands[entry]:
-          command_entry = gam_commands.commands[entry]['category'] + ' > ' + gam_commands.commands[entry]['title']
+        if len(email):
+            split = email.split('@')
+            self.username = split[0]
+            self.domain = split[1]
+            self.password = password
         else:
-          command_entry = gam_commands['title']
-        help_menu_list.append((command_entry,entry))
+            self.username = ''
+            self.domain = ''
+            self.password = ''
+            # self.logIn will attempt to use last authentication token used
+          
+        path = os.path.dirname(os.path.abspath(sys.argv[0]))
+        if os.path.abspath('/') != -1:
+            divider = '/'
+        else:
+            divider = '\\'
+        self.tokenPath = path+divider+'gas_credential_log.txt'
+        self.logIn()
     
-    help_menu_list = sorted(help_menu_list, key=lambda entry: entry[0])
-    help_menu = Menubutton(helper_frame,text='Select category...')
-    help_menu.menu = Menu(help_menu)
-    for entry in help_menu_list:
-      help_menu.menu.add_command(label=entry[0], command=self.HelpFunction(entry[1]))
-      
-    help_menu.pack()
-    help_menu['menu'] = help_menu.menu
+    def getEmail(self):
+        """Returns the email address made up from the username and domain name."""
+        return self.username+'@'+self.domain
     
-    self.help_description = Label(helper_frame, wraplength=(total_width-50), justify=CENTER, padx=25)
-    #self.help_description = Text(helper_frame, relief=FLAT)
-    self.help_description.pack()
+    def getUsername(self):
+        """Returns the currently logged in username."""
+        return self.username
     
-    button = Button(helper_frame, text="Copy to Execute Field", command=self.CopyHelpCommandToExecuteField)
-    button.pack()
-
-    button = Button(helper_frame, text="Close Help", command=helper_frame.destroy)
-    button.pack()
-  
-  def CopyHelpCommandToExecuteField(self):
-    """Copies the currently showing command from the help window to the execute field in the main window.
+    def getDomain(self):
+        """Returns the currently logged in domain name."""
+        return self.domain
     
-    Args:
-      self: The object.
-    
-    Returns:
-      Nothing.
-    """
-    currentCommand = str(self.command_field.get())
-    textToAdd = self.current_help_command
-    if currentCommand:
-      textToAdd = '; '+textToAdd
-    self.command_field.insert(END, textToAdd)
-    self.command_field.focus_force()
-  
-  def HelpFunction(self, help_with):
-    """Pops up a help dialog, allowing the user to get extra help.
-    
-    Args:
-      self: The object.
-      help_with: The specific command to print help details about.
-    
-    Returns:
-      A function to get called associated with the specific command in GAM.
-    """
-    help_object = gam_commands.commands[help_with]
-    def HelpForGivenEntry():
-      """(This is a function inside a function)
-        Sets the help window display elements to the associated documentation for help_with.
-
-      Args:
-        None.
-
-      Returns:
-        Nothing.
-      """
-      example_strings = ["  %s\n%s\n\n" % (example[0], example[1]) for example in help_object['examples']]
-      full_example_string = "\n".join(example_strings)
-      helpful_description_text = """
-Usage:
-%s
-
-Description:%s
-
-Examples:
-%s
-""" % (help_object['usage'],help_object['description'],full_example_string)
-      self.help_description.configure(text=helpful_description_text)
-      self.current_help_command = help_object['usage']
-    return HelpForGivenEntry
-  
-  def MakeExtraFrame(self, parent_frame):
-    """Makes the frame containing the master template container and the output container."""
-    self.left_container = Frame(parent_frame, bd=30)
-    self.left_container.pack(side=LEFT)
+    def credentialLineToList(self, line):
+        splitLine = line.split(',')
+        splitLine = [newLine.strip() for newLine in splitLine]
         
-    self.right_container = Frame(parent_frame, bd=30)
-    self.right_container.pack(side=LEFT)
-    
-    ## Master template container ##
-    label = Label(self.left_container, text='Master Template: (optional)')
-    label.pack()
-    
-    temp_container = Frame(self.left_container)
-    temp_container.pack()
-    
-    self.input_from = Entry(temp_container, width=30)
-    self.input_from.configure(text="~/Desktop/master.txt")
-    self.input_from.pack(side=LEFT)
-    self.input_from.bind("<Return>", self.LoadInput)
-    
-    self.reload_button = Button(temp_container, text="Load")
-    self.reload_button.pack(side=RIGHT)
-    self.reload_button.bind("<Button-1>", self.LoadInput)
-    self.reload_button.bind("<Return>", self.LoadInput)
-    
-    self.input_text = self.MakeTextFrame(self.left_container)
-    
-    ## Output container ##
-    label = Label(self.right_container, text='Output File: (optional)')
-    label.pack()
-    
-    temp_container2 = Frame(self.right_container)
-    temp_container2.pack()
-    
-    self.output_to = Entry(temp_container2, width=30)
-    self.output_to.configure(text="~/Desktop/output.txt")
-    self.output_to.pack(side=LEFT)
-    self.output_to.bind("<Return>", self.ClearOutput)
-    
-    self.clear_button = Button(temp_container2, text="Clear")
-    self.clear_button.pack(side=RIGHT)
-    self.clear_button.bind("<Button-1>", self.ClearOutput)
-    self.clear_button.bind("<Return>", self.ClearOutput)
-    
-    self.output_text = self.MakeTextFrame(self.right_container)
-      
-  def MakeHeaderFrame(self, parent_frame):
-    """Makes the frame containing the header."""
-    big_font = tkFont.Font(family="Arial", size=24)
-    
-    label = Label(parent_frame, font=big_font, text='Google Apps Shell')
-    label.pack()
-      
-  def MakeErrorFrame(self, parent_frame):
-    """Makes the frame containing the error label. The error label gets updated when any execution status changes."""
-    self.standard_error_label = Label(parent_frame, text='')
-    self.standard_error_label.pack()
-    
-  def MakeTextFrame(self, frame, withScroll=True):
-    """Define a new frame and put a text area in it."""
-    text_frame=Frame(frame, relief=RIDGE, borderwidth=2)
-    
-    text=Text(text_frame,height=10,width=50,background='white')
-    text.pack(side=LEFT)
-    
-    # put a scroll bar in the frame
-    scroll=Scrollbar(text_frame)
-    text.configure(yscrollcommand=scroll.set)
-    scroll.pack(side=RIGHT,fill=Y)
-    scroll.configure(command=text.yview)
-    
-    #pack everything
-    text_frame.pack()
-    return text
-  
-  def MakeCredentialFrame(self, parent_frame):
-    """Builds the credential frame, which includes logged in/out info."""
-    Label(parent_frame, text='Credentials').pack()
-    
-    self.log_in_frame = Frame(parent_frame)
-    self.log_out_frame = Frame(parent_frame)
-    
-    username_label = Label(self.log_in_frame, text='Full username: (e.g. admin@domain.com)')
-    username_label.pack()
-    self.log_in_username = Entry(self.log_in_frame, width=30)
-    self.log_in_username.pack()
-    self.log_in_username.bind("<Return>", self.LogIn)
-    
-    password_label = Label(self.log_in_frame, text='Password:')
-    password_label.pack()
-    self.log_in_password = Entry(self.log_in_frame, width=30, show='*')
-    self.log_in_password.pack()
-    self.log_in_password.bind("<Return>", self.LogIn)
-    
-    self.log_in_button = Button(self.log_in_frame, text="Sign In")
-    self.log_in_button.bind("<Button-1>", self.LogIn)
-    self.log_in_button.bind("<Return>", self.LogIn)
-    self.log_in_button.pack()
-    
-    self.log_out_label = Label(self.log_out_frame, text='Currently signed in to _____.')
-    self.log_out_label.pack()
-    
-    self.log_out_button = Button(self.log_out_frame, text="Sign Out")
-    self.log_out_button.bind("<Button-1>", self.LogOut)
-    self.log_out_button.bind("<Return>", self.LogOut)
-    self.log_out_button.pack()
-  
-  def MakeCommandFrame(self, parent_frame):
-    """Builds the command frame, which contains the execute command field and button."""
-    self.command_field = Entry(parent_frame, width=90, justify=CENTER)
-    self.command_field.pack(side=LEFT)
-    self.command_field.bind("<Return>", self.RunExecute)
-
-    self.execute_button = Button(parent_frame, text="Execute")
-    self.execute_button.pack(side=RIGHT)
-    self.execute_button.bind("<Button-1>", self.RunExecute)
-    self.execute_button.bind("<Return>", self.RunExecute)
-  
-  def RunExecute(self, event):
-    """Executes the command."""
-    master_template_lines = self.input_text.get(1.0,END)
-    master_template_lines = master_template_lines.split("\n")
-    master_template = []
-    for line in master_template_lines:
-      if line:
-        # only take the lines that contain text
-        master_template.append(str(line))
-    raw_command = self.command_field.get()
-    commands = raw_command.split(';')
-    self.RunCommands(commands, master_template)
-  
-  def RunCommands(self, commands, master_template=[]):
-    """Executes the command in the command field, or the commands using the master template."""
-    if not master_template:
-      master_template = ['']
-    for template in master_template:
-      mapping = template.split(',')
-      for temp_command in commands:
-        command = temp_command.strip()
-        if not command:
-          continue
-        for index in range(len(mapping)):
-          command = command.replace('{%d}' % (index+1), mapping[index].strip()) # Replace {i} with the value from the template.
-        # Command now contains the right variables.
-        # Execute it.
-        command_list = [entry for entry in shlex.split(command)]
-        sys.argv = [sys.argv[0]] # TODO(pickhardt) refactor the sys.argv into gam
-        sys.argv.extend(command_list)
+        if len(splitLine)==5:
+            return splitLine # in format date, activity, username, domain, token
+        else:
+            return ['','','','','']
+        
+    def lastCredentials(self):
+        # First checks to see whether the username/password combination has a token from Google.
         try:
-          sys.stderr.write('Executing: '+command)
-          gam.execute() # requires arguments passed as sys.argv
-          sys.stderr.write('Finished executing: '+command)
-        except StandardError, e:
-          sys.stderr.write(e)
+            if os.path.isfile(self.tokenPath):
+                tokenFile = open(self.tokenPath, 'r')
+                tokenFileLines = tokenFile.readlines()
+                tokenFile.close()
+            
+                lastLine = tokenFileLines[-1] # the last line in the file should be the most up-to-date authorization token
+                return self.credentialLineToList(lastLine)
+            else:
+                return ['','','','','']
+        except:
+            return ['','','','','']
+
+    def logIn(self):
+        """Authorizes the username, domain, and password with Google.  Stores a token in the text file tokens.txt"""
+        isAuthorized = False
         
-  def LoadInput(self, event):
-    """Loads an input to the input text from a file."""
-    self.input_text.delete('1.0', END)
+        # First checks to see whether the username/password combination has a token from Google.
+        (lineDate, lineActivity, lineUsername, lineDomain, lineToken) = self.lastCredentials()
+        if (lineUsername==self.username and lineDomain==self.domain) or self.username=='':
+            # Either the token matches, or no username was given, in which case we'll try the last token.
+            try:
+                service = gdata.apps.service.AppsService(domain=lineDomain)
+                service.SetClientLoginToken(lineToken)
+                service.RetrieveUser(lineUsername) # test that we're successfully authorized
+                
+                isAuthorized = True
+                self.domain = lineDomain
+                self.username = lineUsername
+                self.token=lineToken
+            except gdata.apps.service.AppsForYourDomainException, e:
+                pass
+            except socket.error, e:
+                raise Exception("Failed to connect to Google's servers.  Please make sure GAM is not being blocked by Firewall or Antivirus software")
+        
+        if not isAuthorized:
+            service = gdata.apps.service.AppsService(email=self.getEmail(), domain=self.domain, password=self.password)
+            try:
+                service.ProgrammaticLogin()
+                service.RetrieveUser(self.username) # test that we're successfully authorized
+                isAuthorized = True
+            except gdata.service.BadAuthentication, e:
+                raise Exception("Invalid username / password combination. Please try again.")
+            except gdata.apps.service.AppsForYourDomainException, e:
+                raise Exception ("Either the user you entered is not a Google Apps Administrator or the Provisioning API is not enabled for your domain. Please see: http://www.google.com/support/a/bin/answer.py?hl=en&answer=60757")
+            except socket.error, e:
+                raise Exception("Failed to connect to Google's servers.")
+            
+            self.token = service.current_token.get_token_string()
+            
+            tokenFile = open(self.tokenPath, 'a')
+            tokenFile.write("\n"+time.asctime() + ',log_in,' + self.username + ',' + self.domain + ',' + self.token)
+            tokenFile.close()
+            
+        self.service = service
+        return service
+    
+    def logOut(self):
+        """Removes the authentication token from the token file, and adds a log out activity."""
+        
+        with open(self.tokenPath, 'r') as tokenFile:
+            tokenLines = tokenFile.readlines()
+        
+        with open(self.tokenPath, 'w') as tokenFile:
+            for line in tokenLines:
+                (lineDate, lineActivity, lineUsername, lineDomain, lineToken) = self.credentialLineToList(line)
+                if lineActivity=='log_in' and lineToken==self.token:
+                    tokenFile.write(lineDate + ',log_in,' + lineUsername + ',' + lineDomain + ',' + 'removed')
+                else:
+                    tokenFile.write(line)
+            tokenFile.write("\n"+time.asctime() + ',log_out,' + self.username + ',' + self.domain + ',no_token')
+        
+        self.username = ''
+        self.domain = ''
+        self.token = ''
+        self.service = False
+
+def logIn(email='', password=''):
+    credential = Credentials(email=args[1], password=args[2])
+    return credential
+
+def logOut(credential):
+    credential.logOut()
+    
+def printAuthentication(credential):
+    """Prints output explaining the current authentication status."""
+    log('Currently authenticated as %s to %s' % (credential.getEmail(), credential.getDomain()))
+
+
+## USER FUNCTIONS ##
+def createUser(credential, user_name, first_name, last_name, password, password_hash_function=None, suspended='false', quota_limit=None, change_password=None):
+    """Creates a user."""
+        
+    if not password_hash_function:
+        new_hash = sha1()
+        new_hash.update(password)
+        password = new_hash.hexdigest()
+        password_hash_function = 'SHA-1'
+    
+    old_domain=''
+    if user_name.find('@') > 0:
+        old_domain = credential.service.domain
+        credential.service.domain = user_name[user_name.find('@')+1:]
+        user_name = user_name[:user_name.find('@')]
+        
+    log("Creating account for %s" % user_name)
+    credential.service.CreateUser(user_name=user_name, family_name=last_name, given_name=first_name, password=password, suspended=suspended, quota_limit=quota_limit, password_hash_function=password_hash_function, change_password=change_password)
+    
+    if old_domain:
+        # reset domain to the old domain
+        credential.service.domain = old_domain
+
+def updateUser(credential, user_name, new_user_name=None, first_name=None, last_name=None, password=None, password_hash_function=None, admin=None, suspended=None, ip_whitelisted=None, change_password=None):
+    """Updates the user."""
+    old_domain=''
+    if user_name.find('@') > 0:
+        old_domain = credential.service.domain
+        credential.service.domain = user_name[user_name.find('@')+1:]
+        user_name = user_name[:user_name.find('@')]
+    
+    user = credential.service.RetrieveUser(user_name)
+    
+    if new_user_name!=None:
+        user.login.user_name = new_user_name
+
+    if first_name!=None:
+        user.name.given_name = first_name
+    
+    if last_name!=None:
+        user.name.family_name = last_name
+    
+    if password!=None:
+        if not password_hash_function:
+            new_hash = sha1()
+            new_hash.update(password)
+            password = new_hash.hexdigest()
+            password_hash_function = 'SHA-1'
+        user.login.password = password
+        user.login.hash_function_name = password_hash_function
+    
+    if admin!=None:
+        if not admin:
+            user.login.admin = 'false'
+        else:
+            user.login.admin = 'true'
+    
+    if suspended!=None:
+        if not suspended:
+            user.login.suspended = 'false'
+        else:
+            user.login.suspended = 'true'
+    
+    if ip_whitelisted!=None:
+        if not ip_whitelisted:
+            user.login.ip_whitelisted = 'false'
+        else:
+            user.login.ip_whitelisted = 'true'
+    
+    if change_password!=None:
+        if not ip_whitelisted:
+            user.login.change_password = 'false'
+        else:
+            user.login.change_password = 'true'
+    
+    log('Updating %s' % user_name)
     try:
-      with open(PathFromCurrent(self.input_from.get())) as input_file:
-        self.input_text.insert('1.0', input_file.read())
-    except:
-      self.input_text.insert('1.0', 'Error reading file.')
-  
-  def ClearOutput(self, event):
-    """Clears the output text."""
-    # Commented out: deleting the output file. 
-    #output_path = getOutputPath()
-    #if os.path.exists(output_path):
-    #  os.remove(output_path)
-    self.output_text.delete('1.0', END)
-  
-  def LogOut(self, event):
-    """Logs out and deletes the token file, if it exists."""
-    # GAM specific code
-    # delete token file
-    token_file_path = gam.getTokenPath()
-    if os.path.exists(token_file_path):
-      os.remove(token_file_path)
+        credential.service.UpdateUser(user_name, user)
+    except gdata.apps.service.AppsForYourDomainException, e:
+      if e.reason == 'EntityExists':
+        raise Exception('EntityExists error. '+user.login.user_name+" is an existing user, group or nickname. Please delete the existing entity with this name before renaming "+user_name)
+      elif e.reason == 'UserDeletedRecently':
+        raise Exception('UserDeletedRecently error. '+user.login.user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
+      else:
+          raise StandardError('An error occurred: '+e.reason)        
     
-    # delete auth file
-    auth_file_path = gam.getAuthPath()
-    if os.path.exists(auth_file_path):
-      os.remove(auth_file_path)
+    if old_domain:
+        # reset domain to the old domain
+        credential.service.domain = old_domain
+
+
+def readUser(credential, user_name, first_name=True, last_name=True, admin=True, suspended=True, ip_whitelisted=True, change_password=True, agreed_to_terms=True):
+    """Reads the user with username user_name."""
+    old_domain=''
+    if user_name.find('@') > 0:
+        old_domain = credential.service.domain
+        credential.service.domain = user_name[user_name.find('@')+1:]
+        user_name = user_name[:user_name.find('@')]
     
-    gam.domain = ''
-    self.log_in_frame.pack()
-    self.log_out_frame.pack_forget()
-  
-  def AutoLogIn(self):
-    """Logs in to Google Apps based on the credentials given in the apps object, which is assumed to work successfully."""
-    apps = gam.getAppsObject()
-    # if we get here, then we've successfully logged in
-    self.log_out_label.configure(text='Currently signed in to '+apps.domain)
-    self.log_in_frame.pack_forget()
-    self.log_out_frame.pack()
-  
-  def LogIn(self, event):
-    """Logs in with the username and password supplied in the fields."""
-    fullUsername = self.log_in_username.get()
-    password = self.log_in_password.get()
-    try:
-      username = fullUsername.split('@')[0]
-      domain = fullUsername.split('@')[1]
-    except:
-      sys.stderr.write('Username must be of form: name@domain.com')
+    user = credential.service.RetrieveUser(user_name)
+    print 'User: %s' % user.login.user_name
     
-    apps = gam.getAppsObject(True, username, domain, password)
-    # if we get here, then we've successfully logged in
-    self.log_out_label.configure(text='Currently signed in to '+apps.domain)
-    self.log_in_password.configure(text='')
-    self.log_in_frame.pack_forget()
-    self.log_out_frame.pack()
-    sys.stderr.write('') # clears the status frame, in case there is anything there
-  
-  def WriteOutput(self, text):
-    """Writes output."""
-    try:
-      with open(PathFromCurrent(self.output_to.get()), 'a') as output_file:
-        output_file.write(text)
-    except:
-      pass
-    self.output_text.insert(END, text)
-  
-  def WriteError(self, text):
-    """Writes error output.""" # TODO
-    self.standard_error_label.configure(text=text)
-
-  
-root = Tk()
-my_app = MyApp(root)
-
-class StdOut:
-  """A class holding the write function for writing the output of commands."""
-  def __init__(self, app):
-    self.app = app
-  
-  def write(self, text):
-    """Writes output."""
-    self.app.WriteOutput(text)
-    self.app.extra_frame.update_idletasks()
-
-std_out = StdOut(my_app)
-sys.stdout = std_out
+    if first_name:
+        print 'First Name: %s' % user.name.given_name
     
-class StdErr:
-  """A class holding the write function for writing errors (or really, writing anything, not necessarily errors, that shouldn't be pushed to the output file)."""
-  def __init__(self, app):
-    self.app = app
-  
-  def write(self, text):
-    """Writes error output."""
-    self.app.WriteError(text)
-    self.app.error_frame.update_idletasks()
+    if last_name:
+        print 'Last Name: %s' % user.name.family_name
+    
+    if admin:
+        print 'Is Admin: %s' % user.login.admin
+    
+    #if suspended:
+    #    print 'Is Suspended: %s' % user.login.suspended
+    
+    if ip_whitelisted:
+        print 'IP Whitelisted: %s' % user.login.ip_whitelisted
+    
+    if change_password:
+        print 'Must Change Password: %s' % user.login.change_password
+    
+    if agreed_to_terms:
+        print 'Has Agreed to Terms: %s' % user.login.agreed_to_terms    
+    
+    if old_domain:
+        # reset domain to the old domain
+        credential.service.domain = old_domain
 
-std_err = StdErr(my_app)
-sys.stderr = std_err
+def suspendUser(credential, user_name, no_rename=False):
+    """Suspends the user with username user_name."""
+    old_domain=''
+    if user_name.find('@') > 0:
+        old_domain = credential.service.domain
+        credential.service.domain = user_name[user_name.find('@')+1:]
+        user_name = user_name[:user_name.find('@')]
+    
+    log('Suspending %s' % user_name)
+    credential.service.SuspendUser(user_name)
+    
+    if old_domain:
+        # reset domain to the old domain
+        credential.service.domain = old_domain
+
+def restoreUser(credential, user_name, no_rename=False):
+    """Suspends the user with username user_name."""
+    old_domain=''
+    if user_name.find('@') > 0:
+        old_domain = credential.service.domain
+        credential.service.domain = user_name[user_name.find('@')+1:]
+        user_name = user_name[:user_name.find('@')]
+    
+    log('Restoring %s' % user_name)
+    credential.service.RestoreUser(user_name)
+
+    if old_domain:
+        # reset domain to the old domain
+        credential.service.domain = old_domain
+
+def deleteUser(credential, user_name, no_rename=False):
+    """Deletes the user with username user_name. The username is first renamed to include the current timestamp; this is so that a new user with the same username can be recreated immediately. If no_rename is set, this part is skipped."""
+    old_domain=''
+    if user_name.find('@') > 0:
+        old_domain = credential.service.domain
+        credential.service.domain = user_name[user_name.find('@')+1:]
+        user_name = user_name[:user_name.find('@')]
+    
+    if not no_rename:
+        time_stamp = time.strftime("%Y%m%d%H%M%S")
+        renamed_user_name = user_name+'-'+time_stamp
+        user = credential.service.RetrieveUser(user_name)
+        user.login.user_name = renamed_user_name
+        log('Renaming %s to %s' % user_name, renamed_user_name)
+        credential.service.UpdateUser(user_name, user)
+        log('Deleting %s' % renamed_user_name)
+        credential.service.DeleteUser(renamed_user_name)
+    else:
+        log('Deleting %s' % user_name)
+        credential.service.DeleteUser(user_name)
+    
+    if old_domain:
+        # reset domain to the old domain
+        credential.service.domain = old_domain
+
+
+## USER EMAIL SETTING FUNCTIONS ##
+
+
+
+## NICKNAME FUNCTIONS ##
+
+
+
+## GROUP FUNCTIONS ##
+
+
+
+## SHARED CONTACT FUNCTIONS ##
+
+
+
+## MULTI DOMAIN FUNCTIONS ##
+
+
+
+## RESOURCE CALENDAR FUNCTIONS ##
+
+
+
+## AUDIT FUNCTIONS ##
+
+
+
+## ORGANIZATIONAL UNIT FUNCTIONS ##
+
+
+
+## PROCESSING FUNCTIONS ##
+
+def log(message):
+    """Logs the message."""
+    print message
+
+def buildArgDict(args, caseSensitive=False):
+    """Takes an array of arguments and builds a dictionary out of it."""
+    dictionary = {}
+    for arg in args:
+        splits = arg.split('=')
+        if len(splits)<2:
+            splits.append(True)
+        if not caseSensitive:
+            # dictionary keys are not case sensitive
+            splits[0]=splits[0].lower()
+        dictionary[splits[0]]=splits[1]
+    return dictionary
+
+whitelist_functions = {
+    'createUser': createUser,
+    'readUser': readUser,
+    'updateUser': updateUser,
+    'deleteUser': deleteUser,
+    'suspendUser': suspendUser,
+    'restoreUser': restoreUser,
+    'printAuthentication': printAuthentication,
+    }
+
+def execute(args):
+    call_function = args[0]
+    dictionary = buildArgDict(args[1:])
+    
+    # logIn and logOut are treated specially since they use the credential
+    if call_function=='logIn':
+        credential = Credentials(**dictionary)
+    elif call_function=='logOut':
+        try:
+            credential = Credentials(**dictionary)
+        except:
+            raise Exception('Cannot log out because you are not logged in.')
+        logOut(credential, **dictionary)
+    else:
+        credential = Credentials('', '')
+        if call_function in whitelist_functions:
+            whitelist_functions[call_function](credential, **dictionary)
+        else:
+            raise Exception('Unknown function '+call_function)
+
+## MAIN ##
+def __main__():
+    args = sys.argv
+    if len(args)<=1:
+        raise Exception('Must provide at least one argument.')
+    execute(args[1:])
 
 if __name__ == '__main__':
-  root.mainloop()
+    __main__()
