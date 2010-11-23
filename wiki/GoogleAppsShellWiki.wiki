@@ -2,12 +2,15 @@
 
 = Introduction =
 
-Google Apps Shell (GAS) is a graphical user interface designed to simplify use of the Google Apps related APIs.
+Google Apps Shell (GAS) is a script enabling Google Apps administrators to leverage the Google Apps APIs without any programming.
 
+Google Apps Shell Interface (GASI) is a graphical user interface designed to simplify use of GAS, as well as the Google Apps Manager (GAM).
+
+This project hosts both GAS and GASI.
 
 = Details =
 
-Google Apps Shell makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager (GAM)] without having to write a bash script.  Some use cases include:
+Google Apps Shell makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from both GAS and the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager (GAM)] without having to write a bash script.  Some use cases include:
   * Changing every user's signature to a custom signature including their email address.
   * Moving every user from one domain to another, then removing the old user alias.
   * Creating resource calendars from a CSV file containing calendar resource information.
@@ -27,7 +30,7 @@ Installation is straightforward so long as you have Python installed.
   # Download gas.zip
   # Unzip gas.zip
   # Through a command line interface, navigate to the gas directory.
-  # Execute a command to open gas.py with Python. This command is typically "python gas.py"
+  # Execute a command to open gasi.py with Python. This command is typically "python gasi.py"
 
 If you are not sure if you have Python installed, try running the command "python gas.py" anyway.  If you don't have Python installed, you can get it at [http://www.python.org/ python.org].
 
@@ -44,12 +47,12 @@ GAS can execute custom commands generated from a CSV. To do so, first load a tem
 
 For instance, if you load the template with a CSV containing "John, Lennon, jlennon\nAdrian, Peterson, apeterson", you could set their signatures with the command:
 
-{{{user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"}}}
+{{{gam user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"}}}
 
 Executing this command would update both signatures.
 
 GAS can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
 
-{{{multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"}}}
+{{{gam multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"}}}
 
 Executing this command would move the user's between multiple domains, as well as update their signature to reflect their new email address.
