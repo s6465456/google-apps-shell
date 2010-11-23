@@ -10,7 +10,7 @@ This project hosts both GAS and GASI.
 
 = Details =
 
-Google Apps Shell makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from both GAS and the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager (GAM)] without having to write a bash script.  Some use cases include:
+The Google Apps Shell Interface makes it simple to programmatically issue commands to your Google Apps account.  It allows users to programmatically execute commands from both GAS and the open source project [https://code.google.com/p/google-apps-manager Google Apps Manager (GAM)] without having to write a bash script.  Some use cases include:
   * Changing every user's signature to a custom signature including their email address.
   * Moving every user from one domain to another, then removing the old user alias.
   * Creating resource calendars from a CSV file containing calendar resource information.
