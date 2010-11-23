@@ -250,9 +250,9 @@ def updateUser(credential, user_name, new_user_name=None, first_name=None, last_
         credential.service.UpdateUser(user_name, user)
     except gdata.apps.service.AppsForYourDomainException, e:
       if e.reason == 'EntityExists':
-        raise Exception('EntityExists error. '+user.login.user_name+" is an existing user, group or nickname. Please delete the existing entity with this name before renaming "+user_name)
+          raise Exception('EntityExists error. '+user.login.user_name+" is an existing user, group or nickname. Please delete the existing entity with this name before renaming "+user_name)
       elif e.reason == 'UserDeletedRecently':
-        raise Exception('UserDeletedRecently error. '+user.login.user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
+          raise Exception('UserDeletedRecently error. '+user.login.user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
       else:
           raise StandardError('An error occurred: '+e.reason)        
     
@@ -269,7 +269,14 @@ def readUser(credential, user_name, first_name=True, last_name=True, admin=True,
         credential.service.domain = user_name[user_name.find('@')+1:]
         user_name = user_name[:user_name.find('@')]
     
-    user = credential.service.RetrieveUser(user_name)
+    try:
+        user = credential.service.RetrieveUser(user_name)
+    except gdata.apps.service.AppsForYourDomainException, e:
+        if e.reason == 'EntityDoesNotExist':
+            raise Exception('EntityDoesNotExist error. '+user_name+" does not exist.")
+        else:
+            raise StandardError('An error occurred: '+e.reason)        
+    
     print 'User: %s' % user.login.user_name
     
     if first_name:
