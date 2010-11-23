@@ -57,6 +57,9 @@ class MyApp:
   """MyApp is the container class for the entire user interface and application."""
   def __init__(self, parent):
     """Creates the entire user interface for GASI, as well as initially logging the user in."""
+    self.error_log = ''
+    self.last_error = ''
+    
     self.parent = parent
     self.parent.title("Google Apps Shell Interface")
     
@@ -117,6 +120,12 @@ class MyApp:
     self.website_button.pack(side=LEFT)
     self.website_button.bind("<Button-1>", self.OpenProjectWebsite)
     self.website_button.bind("<Return>", self.OpenProjectWebsite)
+    
+    self.help_button = Button(parent_frame, text="View Last Error")
+    self.help_button.pack(side=LEFT)
+    self.help_button.bind("<Button-1>", self.PopErrorLog)
+    self.help_button.bind("<Return>", self.PopErrorLog)
+    
   
   def OpenProjectWebsite(self, event, url='http://code.google.com/p/google-apps-shell/'):
     """Opens the project website.
@@ -143,8 +152,9 @@ class MyApp:
     """
     helper_frame = Toplevel(width=total_width)
     helper_frame.title("Help")
-        
-    label = Label(helper_frame, text="Help")
+    
+    medium_font = tkFont.Font(family="Arial", size=18)    
+    label = Label(helper_frame, font=medium_font, text="Help")
     label.pack()
     
     help_menu_list = []
@@ -182,6 +192,34 @@ class MyApp:
 
     button = Button(helper_frame, text="Close Help", command=helper_frame.destroy)
     button.pack()
+
+  def PopErrorLog(self, event, total_width=600):
+    """Pops up an error dialog, allowing the user to view the last error encountered.
+  
+    Args:
+      self: The object.
+      event: The event calling this method.
+  
+    Returns:
+      Nothing.
+    """
+    error_frame = Toplevel(width=total_width)
+    error_frame.title("Error Log")
+    
+    medium_font = tkFont.Font(family="Arial", size=18)
+    label1 = Label(error_frame, font=medium_font, text="Last Error Details")
+    label1.pack()
+    
+    label2 = Label(error_frame, text="Last error shown below. To view the full error log, open gas_details_log.txt")
+    label2.pack()
+  
+    self.error_log_text_area = Label(error_frame, wraplength=(total_width-50), padx=25)
+    self.error_log_text_area.configure(text=self.last_error)
+    self.error_log_text_area.pack()
+      
+    button = Button(error_frame, text="Close Error Log", command=error_frame.destroy)
+    button.pack()
+  
   
   def CopyHelpCommandToExecuteField(self):
     """Copies the currently showing command from the help window to the execute field in the main window.
@@ -292,7 +330,6 @@ Examples:
   def MakeHeaderFrame(self, parent_frame):
     """Makes the frame containing the header."""
     big_font = tkFont.Font(family="Arial", size=24)
-    
     label = Label(parent_frame, font=big_font, text='Google Apps Shell Interface')
     label.pack()
       
@@ -389,7 +426,8 @@ Examples:
         # Command now contains the right variables.
         # Execute it.
         command_list = [entry for entry in shlex.split(command)]
-        sys.stderr.write('Executing: '+command)
+        sys.stderr.write('[gasi] Executing: '+command)
+        self.last_error = '';
         engine = command_list[0].lower() # either 'gam' or 'gas'
         if engine=='gam':
             sys.argv = [sys.argv[0]]
@@ -401,7 +439,7 @@ Examples:
         else:
             # assume they are using GAS
             gas.execute(command_list[1:])
-        sys.stderr.write('Finished executing: '+command)
+        sys.stderr.write('[gasi] Finished executing: '+command)
         
   def LoadInput(self, event):
     """Loads an input to the input text from a file."""
@@ -514,9 +552,30 @@ class StdErr:
   """A class holding the write function for writing errors (or really, writing anything, not necessarily errors, that shouldn't be pushed to the output file)."""
   def __init__(self, app):
     self.app = app
+    self.app.error_log = ''
+    self.app.last_error = ''
   
   def write(self, text):
     """Writes error output."""
+    self.app.error_log = self.app.error_log + text
+    self.app.last_error = self.app.last_error + text
+    
+    # add to View Last Error viewer
+    try:
+        self.app.error_log_text_area.configure(text=self.app.last_error)
+    except:
+        pass # the error log does not exist
+        
+    # add to the gas_details_log.txt file
+    if text[:6]!='[gasi]':
+      # we will not log "Executing:" commands
+      try:
+        with open(PathFromCurrent('gas_details_log.txt'), 'a') as error_file:
+          error_file.write(text)
+      except:
+        pass
+    
+    # add to the current error display
     self.app.WriteError(text)
     self.app.error_frame.update_idletasks()
 
