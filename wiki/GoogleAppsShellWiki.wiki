@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Google Apps Shell (GAS) is a script enabling Google Apps administrators to leverage the Google Apps APIs without any programming.
+Google Apps Shell (GAS) is a script enabling Google Apps administrators to leverage the Google Apps APIs without programming their own script. At the moment, GAS is limited to a few user-related functions, but will be extended to solve a number of common API use cases.
 
 Google Apps Shell Interface (GASI) is a graphical user interface designed to simplify use of GAS, as well as the Google Apps Manager (GAM).
 
