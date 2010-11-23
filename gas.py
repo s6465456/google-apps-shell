@@ -281,8 +281,8 @@ def readUser(credential, user_name, first_name=True, last_name=True, admin=True,
     if admin:
         print 'Is Admin: %s' % user.login.admin
     
-    #if suspended:
-    #    print 'Is Suspended: %s' % user.login.suspended
+    if suspended:
+        print 'Is Suspended: %s' % user.login.suspended
     
     if ip_whitelisted:
         print 'IP Whitelisted: %s' % user.login.ip_whitelisted
