@@ -17,7 +17,7 @@
 """Google Apps Shell Interface is a graphical user interface designed to simplify use of the Google Apps related APIs."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '0.2.0'
+__version__ = '1.0.0'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys
