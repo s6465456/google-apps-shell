@@ -2,6 +2,10 @@
 #
 # Google Apps Shell
 #
+# Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain.
+# For more information, see http://code.google.com/p/google-apps-shell/
+# It was inspired by the Google Apps Manager (see http://code.google.com/p/google-apps/manager/)
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +21,7 @@
 """Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '0.2.0'
+__version__ = '1.0.0'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv
@@ -114,7 +118,7 @@ class Credentials:
             except gdata.apps.service.AppsForYourDomainException, e:
                 pass
             except socket.error, e:
-                raise Exception("Failed to connect to Google's servers.  Please make sure GAM is not being blocked by Firewall or Antivirus software")
+                raise Exception("Failed to connect to Google's servers.")
         
         if not isAuthorized:
             service = gdata.apps.service.AppsService(email=self.getEmail(), domain=self.domain, password=self.password)
@@ -123,7 +127,7 @@ class Credentials:
                 service.RetrieveUser(self.username) # test that we're successfully authorized
                 isAuthorized = True
             except gdata.service.BadAuthentication, e:
-                raise Exception("Invalid username / password combination. Please try again.")
+                raise Exception("Invalid username and password combination. Please try again.")
             except gdata.apps.service.AppsForYourDomainException, e:
                 raise Exception ("Either the user you entered is not a Google Apps Administrator or the Provisioning API is not enabled for your domain. Please see: http://www.google.com/support/a/bin/answer.py?hl=en&answer=60757")
             except socket.error, e:
@@ -159,10 +163,12 @@ class Credentials:
         self.service = False
 
 def logIn(email='', password=''):
+    """Logs in with the credentials provided by the email and password arguments."""
     credential = Credentials(email=args[1], password=args[2])
     return credential
 
 def logOut(credential):
+    """Logs out of the current credentials."""
     credential.logOut()
     
 def printAuthentication(credential):
@@ -187,7 +193,16 @@ def createUser(credential, user_name, first_name, last_name, password, password_
         user_name = user_name[:user_name.find('@')]
         
     log("Creating account for %s" % user_name)
-    credential.service.CreateUser(user_name=user_name, family_name=last_name, given_name=first_name, password=password, suspended=suspended, quota_limit=quota_limit, password_hash_function=password_hash_function, change_password=change_password)
+    try:
+        credential.service.CreateUser(user_name=user_name, family_name=last_name, given_name=first_name, password=password, suspended=suspended, quota_limit=quota_limit, password_hash_function=password_hash_function, change_password=change_password)
+    except gdata.apps.service.AppsForYourDomainException, e:
+        if e.reason == 'EntityExists':
+            raise Exception('EntityExists error. '+user_name+" is an existing user, group or nickname. Please delete the existing entity with this name before creating "+user_name)
+        elif e.reason == 'UserDeletedRecently':
+            raise Exception('UserDeletedRecently error. '+user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
+        else:
+            raise StandardError('An error occurred: '+e.reason)        
+    
     
     if old_domain:
         # reset domain to the old domain
@@ -249,12 +264,12 @@ def updateUser(credential, user_name, new_user_name=None, first_name=None, last_
     try:
         credential.service.UpdateUser(user_name, user)
     except gdata.apps.service.AppsForYourDomainException, e:
-      if e.reason == 'EntityExists':
-          raise Exception('EntityExists error. '+user.login.user_name+" is an existing user, group or nickname. Please delete the existing entity with this name before renaming "+user_name)
-      elif e.reason == 'UserDeletedRecently':
-          raise Exception('UserDeletedRecently error. '+user.login.user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
-      else:
-          raise StandardError('An error occurred: '+e.reason)        
+        if e.reason == 'EntityExists':
+            raise Exception('EntityExists error. '+user.login.user_name+" is an existing user, group or nickname. Please delete the existing entity with this name before renaming "+user_name)
+        elif e.reason == 'UserDeletedRecently':
+            raise Exception('UserDeletedRecently error. '+user.login.user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
+        else:
+            raise StandardError('An error occurred: '+e.reason)        
     
     if old_domain:
         # reset domain to the old domain
@@ -304,7 +319,7 @@ def readUser(credential, user_name, first_name=True, last_name=True, admin=True,
         # reset domain to the old domain
         credential.service.domain = old_domain
 
-def suspendUser(credential, user_name, no_rename=False):
+def suspendUser(credential, user_name):
     """Suspends the user with username user_name."""
     old_domain=''
     if user_name.find('@') > 0:
@@ -319,7 +334,7 @@ def suspendUser(credential, user_name, no_rename=False):
         # reset domain to the old domain
         credential.service.domain = old_domain
 
-def restoreUser(credential, user_name, no_rename=False):
+def restoreUser(credential, user_name):
     """Suspends the user with username user_name."""
     old_domain=''
     if user_name.find('@') > 0:
@@ -342,18 +357,18 @@ def deleteUser(credential, user_name, no_rename=False):
         credential.service.domain = user_name[user_name.find('@')+1:]
         user_name = user_name[:user_name.find('@')]
     
-    if not no_rename:
+    if no_rename.lower()=='true':
+        log('Deleting %s' % user_name)
+        credential.service.DeleteUser(user_name)
+    else:
         time_stamp = time.strftime("%Y%m%d%H%M%S")
         renamed_user_name = user_name+'-'+time_stamp
         user = credential.service.RetrieveUser(user_name)
         user.login.user_name = renamed_user_name
-        log('Renaming %s to %s' % user_name, renamed_user_name)
+        log('Renaming %s to %s' % (user_name, renamed_user_name))
         credential.service.UpdateUser(user_name, user)
         log('Deleting %s' % renamed_user_name)
         credential.service.DeleteUser(renamed_user_name)
-    else:
-        log('Deleting %s' % user_name)
-        credential.service.DeleteUser(user_name)
     
     if old_domain:
         # reset domain to the old domain
@@ -389,6 +404,10 @@ def deleteUser(credential, user_name, no_rename=False):
 
 
 ## ORGANIZATIONAL UNIT FUNCTIONS ##
+
+
+
+## DOCS FUNCTIONS ##
 
 
 
