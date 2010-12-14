@@ -145,17 +145,19 @@ class Credentials:
     def logOut(self):
         """Removes the authentication token from the token file, and adds a log out activity."""
         
-        with open(self.tokenPath, 'r') as tokenFile:
-            tokenLines = tokenFile.readlines()
+        tokenFile = open(self.tokenPath, 'r')
+        tokenLines = tokenFile.readlines()
+        tokenFile.close()
         
-        with open(self.tokenPath, 'w') as tokenFile:
-            for line in tokenLines:
-                (lineDate, lineActivity, lineUsername, lineDomain, lineToken) = self.credentialLineToList(line)
-                if lineActivity=='log_in' and lineToken==self.token:
-                    tokenFile.write(lineDate + ',log_in,' + lineUsername + ',' + lineDomain + ',' + 'removed')
-                else:
-                    tokenFile.write(line)
-            tokenFile.write("\n"+time.asctime() + ',log_out,' + self.username + ',' + self.domain + ',no_token')
+        tokenFile = open(self.tokenPath, 'w')
+        for line in tokenLines:
+            (lineDate, lineActivity, lineUsername, lineDomain, lineToken) = self.credentialLineToList(line)
+            if lineActivity=='log_in' and lineToken==self.token:
+                tokenFile.write(lineDate + ',log_in,' + lineUsername + ',' + lineDomain + ',' + 'removed')
+            else:
+                tokenFile.write(line)
+        tokenFile.write("\n"+time.asctime() + ',log_out,' + self.username + ',' + self.domain + ',no_token')
+        tokenFile.close()
         
         self.username = ''
         self.domain = ''

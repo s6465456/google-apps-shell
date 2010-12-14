@@ -249,12 +249,12 @@ class MyApp:
     """
     
     try:
-        help_object = gam_commands.commands[help_with]
+      help_object = gam_commands.commands[help_with]
     except:
-        try:
-            help_object = gas_commands.commands[help_with]
-        except:
-            raise StandardError('HelpFunction could not find the help entry for the command %s' % help_with)
+      try:
+        help_object = gas_commands.commands[help_with]
+      except:
+        raise StandardError('HelpFunction could not find the help entry for the command %s' % help_with)
     
     def HelpForGivenEntry():
       """(This is a function inside a function)
@@ -279,6 +279,7 @@ Examples:
 """ % (help_object['usage'],help_object['description'],full_example_string)
       self.help_description.configure(text=helpful_description_text)
       self.current_help_command = help_object['usage']
+      return True # end the function within a function
     return HelpForGivenEntry
   
   def MakeExtraFrame(self, parent_frame):
@@ -430,23 +431,24 @@ Examples:
         self.last_error = '';
         engine = command_list[0].lower() # either 'gam' or 'gas'
         if engine=='gam':
-            sys.argv = [sys.argv[0]]
-            sys.argv.extend(command_list[1:])
-            try:
-              gam.execute() # requires arguments passed as sys.argv
-            except StandardError, e:
-              sys.stderr.write(e)
+          sys.argv = [sys.argv[0]]
+          sys.argv.extend(command_list[1:])
+          try:
+            gam.execute() # requires arguments passed as sys.argv
+          except StandardError, e:
+            sys.stderr.write(e)
         else:
-            # assume they are using GAS
-            gas.execute(command_list[1:])
+          # assume they are using GAS
+          gas.execute(command_list[1:])
         sys.stderr.write('[gasi] Finished executing: '+command)
         
   def LoadInput(self, event):
     """Loads an input to the input text from a file."""
     self.input_text.delete('1.0', END)
     try:
-      with open(PathFromCurrent(self.input_from.get())) as input_file:
-        self.input_text.insert('1.0', input_file.read())
+      input_file = open(PathFromCurrent(self.input_from.get()))
+      self.input_text.insert('1.0', input_file.read())
+      input_file.close()
     except:
       self.input_text.insert('1.0', 'Error reading file.')
   
@@ -521,8 +523,9 @@ Examples:
   def WriteOutput(self, text):
     """Writes output."""
     try:
-      with open(PathFromCurrent(self.output_to.get()), 'a') as output_file:
-        output_file.write(text)
+      output_file = open(PathFromCurrent(self.output_to.get()), 'a')
+      output_file.write(text)
+      output_file.close()
     except:
       pass
     self.output_text.insert(END, text)
@@ -557,8 +560,8 @@ class StdErr:
   
   def write(self, text):
     """Writes error output."""
-    self.app.error_log = self.app.error_log + text
-    self.app.last_error = self.app.last_error + text
+    self.app.error_log = self.app.error_log + str(text)
+    self.app.last_error = self.app.last_error + str(text)
     
     # add to View Last Error viewer
     try:
@@ -570,8 +573,9 @@ class StdErr:
     if text[:6]!='[gasi]':
       # we will not log "Executing:" commands
       try:
-        with open(PathFromCurrent('gas_details_log.txt'), 'a') as error_file:
-          error_file.write(text)
+        error_file = open(PathFromCurrent('gas_details_log.txt'), 'a')
+        error_file.write(text)
+        error_file.close()
       except:
         pass
     

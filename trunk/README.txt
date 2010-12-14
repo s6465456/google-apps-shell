@@ -18,3 +18,6 @@ without having to write a bash script. Some use cases include...
 To run GAS or GASI, have your computer open it with Python.  This can be
 done by, navigating to this directory from a terminal, andexecute a command to
 open gasi.py with Python. This command is typically "python gasi.py"
+
+For more information, see:
+    https://code.google.com/p/google-apps-shell
