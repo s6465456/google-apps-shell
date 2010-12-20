@@ -17,7 +17,7 @@
 """Google Apps Shell Interface is a graphical user interface designed to simplify use of the Google Apps related APIs."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys
@@ -331,8 +331,11 @@ Examples:
   def MakeHeaderFrame(self, parent_frame):
     """Makes the frame containing the header."""
     big_font = tkFont.Font(family="Arial", size=24)
+    small_font = tkFont.Font(family="Arial", size=9)
     label = Label(parent_frame, font=big_font, text='Google Apps Shell Interface')
     label.pack()
+    version = Label(parent_frame, font=small_font, text='Version %s' % __version__)
+    version.pack()
       
   def MakeErrorFrame(self, parent_frame):
     """Makes the frame containing the error label. The error label gets updated when any execution status changes."""

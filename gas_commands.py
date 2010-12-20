@@ -1,6 +1,9 @@
 # gas_commands.py
 #
 # Documentation for the GAS commands.
+
+__version__ = '1.1.0'
+
 commands = {
 
   'createUser': {
@@ -81,6 +84,19 @@ Suspends the given user's account.
       'This example suspend the account for user igotfired. Suspended accounts can be restored at a later date.')
       ]
   },
+  
+  'renameUser': {
+      'title': 'Rename a User',
+      'category': 'Users',
+      'usage': 'gas renameUser user_name=<name> new_user_name=<name>',
+      'description': """
+  Renames the user_name account to new_user_name. Note that the user's primary calendar name must still be changed manually.
+  """,
+      'examples': [
+        ('gas renameUser user_name=christopher new_user_name=chris',
+        'This example renames the user christopher to chris.')
+        ]
+    },
 
   'restoreUser': {
     'title': 'Restore a User',

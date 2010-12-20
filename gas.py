@@ -21,7 +21,7 @@
 """Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv
@@ -351,6 +351,10 @@ def restoreUser(credential, user_name):
         # reset domain to the old domain
         credential.service.domain = old_domain
 
+def renameUser(credential, user_name, new_user_name):
+    """Renames the user with username user_name with new_user_name. This function is explicitly included since renaming user is such a popular feature."""
+    updateUser(credential, user_name, new_user_name)
+
 def deleteUser(credential, user_name, no_rename=False):
     """Deletes the user with username user_name. The username is first renamed to include the current timestamp; this is so that a new user with the same username can be recreated immediately. If no_rename is set, this part is skipped."""
     old_domain=''
@@ -439,6 +443,7 @@ whitelist_functions = {
     'deleteUser': deleteUser,
     'suspendUser': suspendUser,
     'restoreUser': restoreUser,
+    'renameUser': renameUser,
     'printAuthentication': printAuthentication,
     }
 
