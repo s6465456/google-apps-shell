@@ -17,7 +17,7 @@
 """Google Apps Shell Interface is a graphical user interface designed to simplify use of the Google Apps related APIs."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.1.0'
+__version__ = '1.1.2'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys
@@ -481,7 +481,7 @@ Examples:
     gam.domain = ''
     
     # Log out of GAS:
-    gas.execute(['logOut'])
+    gas.execute(['log_out'])
     
     # Reset the authentication frames
     self.log_in_frame.pack()
@@ -492,7 +492,7 @@ Examples:
     gam_apps = gam.getAppsObject()
     # if we get here, then we've successfully logged in to gam
     
-    gas.execute(['logIn'])
+    gas.execute(['log_in'])
     # if we get here, then we've successfully logged in to gas
     
     self.log_out_label.configure(text='Currently signed in to '+gam_apps.domain)
@@ -514,7 +514,7 @@ Examples:
     # if we get here, then we've successfully logged in to gam
     
     # log in to gas    
-    gas.execute(['logIn', 'email=%s' % fullUsername, 'password=%s' % password])
+    gas.execute(['log_in', 'email=%s' % fullUsername, 'password=%s' % password])
     # if we get here, then we've successfully logged in to gas
     
     self.log_out_label.configure(text='Currently signed in to '+gam_apps.domain)
