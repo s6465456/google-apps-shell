@@ -21,7 +21,7 @@
 """Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.1.2'
+__version__ = '1.1.3'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv
