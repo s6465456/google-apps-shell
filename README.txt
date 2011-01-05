@@ -15,9 +15,9 @@ without having to write a bash script. Some use cases include...
   * Creating resource calendars from a CSV file containing calendar resource information.
   * ...and any other interesting combination of Google Apps API commands.
 
-To run GASI on Mac OS X, double click on the gasi.app file in the mac folder.
+To run GASI on Mac OS X, double click on the gasi.app file in the mac_app folder.
 
-To run GASI on Windows, double click on the gasi.exe file in the windows directory.
+To run GASI on Windows, double click on the gasi.exe file in the windows_app directory.
 
 To run GAS or GASI from any computer with Python installed, you can run the
 gasi.py file with Python.  This can be done by navigating to this directory
