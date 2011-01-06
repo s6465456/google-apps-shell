@@ -85,3 +85,12 @@ Issuing commands from templates and issuing compound commands can be used togeth
 Here is a screen shot illustrating this concept:
 
 [http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/compound_commands_from_template.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/compound_commands_from_template.png]
+
+
+= Debugging Errors =
+
+When an error occurs, GASI will output the error code underneath the execution bar.  The full error code can be viewed by clicking the View Last Error button.  Further, GASI logs all executing details in gas_details_log.txt.
+
+To understand the error codes, look at the last error and try to interpret what it means. For example, in the following screen shot, the error is an AppsForYourDomainException stating there is an invalid input walter2 with the reason EntityDoesNotExist.  In English, what this means is that the user walter2 does not exist in Google Apps, so it cannot be deleted.
+
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/error.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/error.png]
