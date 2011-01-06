@@ -39,9 +39,18 @@ To execute a command, type in the command and click Execute.  Here is an example
 
 = Issuing Commands from a Template =
 
-GAS can execute custom commands generated from a CSV. To do so, first load a template CSV to the Master Template. Next, find the command you wish to use and enter it in the execution field. When executed, GASI will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
+GAS can execute custom commands generated from a CSV.
 
-For instance, if you load the template with a CSV containing "John, Lennon, jlennon\nAdrian, Peterson, apeterson", you could set their signatures with the command:
+To use templates, first populate a CSV file with columns for each variable.  For example, the first column might be username, the second column might be firstname, and so on.  Then place the CSV file in the GASI directory, the same directory that the mac_app and windows_app directories are found.
+
+Next, load the template to the Master Template in GASI by typing the file name under Master Template and clicking Load (template.csv, for instance). Then find the command you wish to use and enter it in the execution field. When executed, GASI will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
+
+For instance, if you load the template with a CSV containing:
+
+{{{John, Lennon, jlennon
+Adrian, Peterson, apeterson}}}
+
+You could then set their signatures with the command:
 
 {{{gam user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"}}}
 
@@ -62,7 +71,5 @@ Here is a screen shot of a compound command:
 
 
 = Issuing Compound Commands from a Template =
-
-
 
 
