@@ -58,6 +58,10 @@ You could then set their signatures with the command:
 
 Executing this command would update both signatures.
 
+Here is a screen shot illustrating commands built from templates:
+
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/command_from_template.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/command_from_template.png]
+
 
 = Issuing Compound Commands =
 
@@ -73,3 +77,11 @@ Here is a screen shot of a compound command:
 
 
 = Issuing Compound Commands from a Template =
+
+Issuing commands from templates and issuing compound commands can be used together. For instance, using the previous examples, you could move users between multiple domains and update their signature with the following compound command:
+
+{{{gam multi move {3}@altostrat.com {3}@betastrat.com; gam user {3}@betastrat.com signature "My name is {1} {2} and my email address is now {3}@betastrat.com"}}}
+
+Here is a screen shot illustrating this concept:
+
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/compound_commands_from_template.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/compound_commands_from_template.png]
