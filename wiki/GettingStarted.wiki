@@ -1,0 +1,42 @@
+#summary Getting Started with GASI.
+
+= Prerequisites =
+
+This page assumes you have already downloaded and installed GASI. If this is not the case, see the [http://code.google.com/p/google-apps-shell/ Project Home].
+
+
+= Opening GASI =
+
+  # On Mac OS X, double click on gasi.app located in the mac_app folder.
+  # On Windows, double click on gasi.exe located in the windows_app directory.
+  # Otherwise, through a command line interface, navigate to the gasi directory. Then execute a command to open gasi.py with Python. This command is typically "python gasi.py"
+
+If you are not sure if you have Python installed, try running the command "python gasi.py" anyway.  If you don't have Python installed, you can get it at [http://www.python.org/ python.org].
+
+At this point, you should see the following:
+
+
+= Authenticating to Google Apps =
+
+In order for GASI to issue commands to your Google Apps, you have to be logged in through GASI.  To log in, enter an administrative username and password. If you have already logged in to GASI without logging out, you should already be logged in when GASI opens.
+
+
+= Running a Simple Command =
+
+The graphical user interface GASI can call functions from both GAS and GAM (version 1.6.1).  To see what commands you can use, either visit the GAM website or click Open Documentation in GASI.
+
+To execute a command, type in the command and click Execute.
+
+GAS can execute custom commands generated from a CSV. To do so, first load a template CSV to the Master Template. Next, find the command you wish to use and enter it in the execution field. When executed, GASI will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
+
+For instance, if you load the template with a CSV containing "John, Lennon, jlennon\nAdrian, Peterson, apeterson", you could set their signatures with the command:
+
+{{{gam user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"}}}
+
+Executing this command would update both signatures.
+
+GASI can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
+
+{{{gam multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"}}}
+
+Executing this command would move the user's between multiple domains, as well as update their signature to reflect their new email address.
