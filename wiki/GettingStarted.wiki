@@ -47,8 +47,10 @@ Next, load the template to the Master Template in GASI by typing the file name u
 
 For instance, if you load the template with a CSV containing:
 
-{{{John, Lennon, jlennon
-Adrian, Peterson, apeterson}}}
+{{{
+John, Lennon, jlennon
+Adrian, Peterson, apeterson
+}}}
 
 You could then set their signatures with the command:
 
@@ -71,5 +73,3 @@ Here is a screen shot of a compound command:
 
 
 = Issuing Compound Commands from a Template =
-
-
