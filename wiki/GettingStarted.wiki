@@ -21,12 +21,23 @@ At this point, you should see the following:
 
 In order for GASI to issue commands to your Google Apps, you have to be logged in through GASI.  To log in, enter an administrative username and password. If you have already logged in to GASI without logging out, you should already be logged in when GASI opens.
 
+Once authenticated, you should see something like the following:
 
-= Running a Simple Command =
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/authenticated.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/authenticated.png]
+
+
+= Issuing a Simple Command =
 
 The graphical user interface GASI can call functions from both GAS and GAM (version 1.6.1).  To see what commands you can use, either visit the GAM website or click Open Documentation in GASI.
 
-To execute a command, type in the command and click Execute.
+To browse the possible commands, click Open Documentation.
+
+To execute a command, type in the command and click Execute.  Here is an example:
+
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/simple_command.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/simple_command.png]
+
+
+= Issuing Commands from a Template =
 
 GAS can execute custom commands generated from a CSV. To do so, first load a template CSV to the Master Template. Next, find the command you wish to use and enter it in the execution field. When executed, GASI will sequentially run the command for each row in the CSV, replacing any {N} string with the value of the Nth column.
 
@@ -36,8 +47,22 @@ For instance, if you load the template with a CSV containing "John, Lennon, jlen
 
 Executing this command would update both signatures.
 
-GASI can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move John and Adrian between multiple domains, as well as update their signature, you could type the following in the execute field:
 
-{{{gam multi move {3}@altostrat.com {3}@betastrat.com; user {3}@betastrat.com signature "My email address is now {3}@betastrat.com"}}}
+= Issuing Compound Commands =
+
+GASI can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move a user between multiple domains, as well as update their signature, you could type the following in the execute field:
+
+{{{gam multi move john@altostrat.com john@betastrat.com; gam user john@betastrat.com signature "My email address is now john@betastrat.com"}}}
 
 Executing this command would move the user's between multiple domains, as well as update their signature to reflect their new email address.
+
+Here is a screen shot of a compound command:
+
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/compound_command.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/compound_command.png]
+
+
+= Issuing Compound Commands from a Template =
+
+
+
+
