@@ -15,6 +15,7 @@ If you are not sure if you have Python installed, try running the command "pytho
 
 At this point, you should see the following:
 
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/blank.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/blank.png]
 
 = Authenticating to Google Apps =
 
