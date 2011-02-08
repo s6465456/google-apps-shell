@@ -2,7 +2,7 @@
 #
 # Documentation for the GAS commands.
 
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 
 commands = {
 
@@ -254,16 +254,265 @@ Sets the user's language preference to language. Some common language codes are 
         ]
   },
     
+  'create_nickname': {
+      'title': 'Create Nickname',
+      'category': 'Nickname Settings',
+      'usage': 'gas create_nickname nickname=<nickname> user_name=<name>',
+      'description': """
+Creates a nickname on behalf of user_name.
+""",
+      'examples': [
+        ('gas create_nickname nickname=joey user_name=joseph',
+        'This example creates a nickname for the user joseph, with the nickname joey.')
+        ]
+  },
+
+  'read_nickname': {
+      'title': 'Read Nickname',
+      'category': 'Nickname Settings',
+      'usage': 'gas read_nickname nickname=<nickname>',
+      'description': """
+Prints out a summary of the nickname, if it exists.
+""",
+      'examples': [
+        ('gas read_nickname nickname=joey',
+        'This example reads the nickname for joey.')
+        ]
+  },
+  
+  'delete_nickname': {
+      'title': 'Delete Nickname',
+      'category': 'Nickname Settings',
+      'usage': 'gas delete_nickname nickname=<nickname>',
+      'description': """
+Deletes a nickname, if it exists.
+""",
+      'examples': [
+        ('gas delete_nickname nickname=joey',
+        'This example deletes the nickname for joey.')
+        ]
+  },
+
+  'create_org': {
+      'title': 'Create Organization',
+      'category': 'Organization Settings',
+      'usage': 'gas create_org name=<org> description=<description> [parent=<parent_org>] [block_inheritance=true]',
+      'description': """
+Creates an organization unit <org> with description <description>.  If parent is specified, the organization is created under the parent.  If block_inheritance is true, the organization does not inherit settings from the parent.
+""",
+      'examples': [
+        ('gas create_org name=canada description="Canadian users"',
+        'This example creates an organizational unnit for Canadian users in the company.')
+        ]
+  },
+
+  'update_org': {
+      'title': 'Update Organization',
+      'category': 'Organization Settings',
+      'usage': 'gas update_org name=<org> description=<description> [parent=<parent_org>] [block_inheritance=true] [users_to_move=<user_list>]',
+      'description': """
+Updates an organization unit with the settings specified.  Optional variable users_to_move contains a space-separated list of users to move to the organization.
+""",
+      'examples': [
+        ('gas update_org name=sales description="This org contains the sales users" users_to_move="jeff courtney jedd sarah mike tessa stephanie"',
+        'Updates the sales org with an updated description and moves a list of users to that organization.')
+        ]
+  },
+
+  'add_users_to_org': {
+      'title': 'Add Users to Organization',
+      'category': 'Organization Settings',
+      'usage': 'gas add_users_to_org name=<org> users_to_move=<user_list>',
+      'description': """
+Adds a list of users to the specified organization.  Optional variable users_to_move contains a space-separated list of users to move to the organization.
+""",
+      'examples': [
+        ('gas add_users_to_org name=<name> users_to_move="jeff courtney jedd sarah mike tessa stephanie"',
+        'This example adds the users in users_to_move to the organization.')
+        ]
+  },
+
+  'read_org': {
+      'title': 'Read Organization',
+      'category': 'Organization Settings',
+      'usage': 'gas read_org name=<name>',
+      'description': """
+Prints information about the organization.
+""",
+      'examples': [
+        ('gas read_org name=Sales',
+        'This example prints information about the Sales organization.')
+        ]
+  },
+
+  'delete_org': {
+      'title': 'Delete Organization',
+      'category': 'Organization Settings',
+      'usage': 'gas delete_org name=<name>',
+      'description': """
+Deletes an organization. The organization must NOT contain any users, otherwise it cannot be deleted.
+""",
+      'examples': [
+        ('gas delete_org name=Sales',
+        'This example deletes the sales organization.')
+        ]
+  },
+
+  'create_group': {
+      'title': 'Create Group',
+      'category': 'Groups',
+      'usage': 'gas create_group id=<groupid> name=<name> description=<description> permission=[owner|member|domain|anyone]',
+      'description': """
+Creates a group, groupid@yourdomain.com, with name and description. The permissions details the email permissions to the group.
+""",
+      'examples': [
+        ('gas create_group id=sales name=Sales description="The sales group." permission=domain',
+        'This example creates a Google Group, sales, with email permissions such that anyone in the domain can email the group.')
+        ]
+  },
+
+  'read_group': {
+      'title': 'Read Group',
+      'category': 'Groups',
+      'usage': 'gas read_group id=<groupid>',
+      'description': """
+Outputs information about the Google Group.
+""",
+      'examples': [
+        ('gas read_group id=sales',
+        'This example outputs information about the sales group.')
+        ]
+  },
+
+
+  'update_group': {
+      'title': 'Update Group',
+      'category': 'Groups',
+      'usage': 'gas update_group id=<groupid> name=<name> description=<description> permission=[owner|member|domain|anyone]',
+      'description': """
+Updates the group, groupid@yourdomain.com, with name and description. The permissions details the email permissions to the group.
+""",
+      'examples': [
+        ('gas update_group id=secret name=Secret description="New description" permission=member',
+        'This example the secret group to have the new settings.')
+        ]
+  },
+
+  'delete_group': {
+      'title': 'Delete Group',
+      'category': 'Groups',
+      'usage': 'gas delete_group id=<groupid>',
+      'description': """
+Deletes the Google Group.
+""",
+      'examples': [
+        ('gas delete_group id=sales',
+        'Deletes the sales group.')
+        ]
+  },
+
+  'list_groups': {
+      'title': 'List All Groups',
+      'category': 'Groups',
+      'usage': 'gas list_groups',
+      'description': """
+Lists all Google Groups in the domain.
+""",
+      'examples': [
+        ('gas list_groups',
+        'This example lists all groups.')
+        ]
+  },
+
+  'list_group_members': {
+      'title': 'List Group Members',
+      'category': 'Groups',
+      'usage': 'gas list_group_members id=<groupid> [suspended_users=true]',
+      'description': """
+Lists all Google Group members of the group. If suspended_users is true, this will also list suspended users who are still members of the group.
+""",
+      'examples': [
+        ('gas list_group_members id=starship_enterprise suspended_users=true',
+        'This example lists all members of the starship_enterprise group.')
+        ]
+  },
+
+  'list_group_owners': {
+      'title': 'List Group Owners',
+      'category': 'Groups',
+      'usage': 'gas list_group_owners id=<groupid> [suspended_users=true]',
+      'description': """
+Lists all Google Group owners of the group. If suspended_users is true, this will also list suspended users who are still owners of the group.
+""",
+      'examples': [
+        ('gas list_group_owners id=starship_enterprise suspended_users=true',
+        'This example lists all owners of the starship_enterprise group, such as Jean-Luc Picard.')
+        ]
+  },
+
+
+  'add_member_to_group': {
+      'title': 'Add Member to Group',
+      'category': 'Groups',
+      'usage': 'gas add_member_to_group user=<name> id=<groupid>',
+      'description': """
+Adds a member to a Google Group.
+""",
+      'examples': [
+        ('gas add_member_to_group user=scotty id=starship_enterprise',
+        'This example beams up Scotty to the starship_enterprise group.')
+        ]
+  },
+
+  'remove_member_from_group': {
+      'title': 'Remove Member from Group',
+      'category': 'Groups',
+      'usage': 'gas remove_member_from_group user=<name> id=<groupid>',
+      'description': """
+Removes a member from a Google Group.
+""",
+      'examples': [
+        ('gas remove_member_from_group user=scotty id=starship_enterprise',
+        'This example removes a member from the starship_enterprise group.')
+        ]
+  },
+
+  'add_owner_to_group': {
+      'title': 'Add Owner to Group',
+      'category': 'Groups',
+      'usage': 'gas add_owner_to_group user=<name> id=<groupid>',
+      'description': """
+Adds an owner to a Google Group.
+""",
+      'examples': [
+        ('gas add_owner_to_group user=picard id=starship_enterprise',
+        'This example adds picard to the starship_enterprise group as an owner.')
+        ]
+  },
+
+  'remove_owner_from_group': {
+      'title': 'Remove Owner from Group',
+      'category': 'Groups',
+      'usage': 'gas remove_owner_from_group user=<name> id=<groupid>',
+      'description': """
+Removes an owner from a Google Group
+""",
+      'examples': [
+        ('gas remove_owner_from_group user=picard id=starship_enterprise',
+        'This example removes owner picard from the starship_enterprise group')
+        ]
+  },
+
   '_TEMPLATE': {
       'title': '',
       'category': '',
       'usage': '',
       'description': """
-  
+
 """,
       'examples': [
         ('',
         '')
         ]
-  }
+  },
 }
