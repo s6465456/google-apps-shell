@@ -21,7 +21,7 @@
 """Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv
@@ -109,6 +109,7 @@ class Credentials:
             return ['','','','','']
 
     def get_email_settings_object(self):
+        """Returns an EmailSettings object from gdata."""
         try:
             return self.EmailSettings
         except:
@@ -116,6 +117,24 @@ class Credentials:
             self.EmailSettings.SetClientLoginToken(self.service.current_token.get_token_string())
             return self.EmailSettings
 
+    def get_organization_object(self):
+        """Returns an OrganizationService object from gdata."""
+        try:
+            return self.Orgs
+        except:
+            self.Orgs = gdata.apps.orgs.service.OrganizationService(domain=self.domain)
+            self.Orgs.SetClientLoginToken(self.service.current_token.get_token_string())
+            return self.Orgs
+
+    def get_groups_object(self):
+        """Returns a GroupsService object from gdata."""
+        try:
+            return self.Groups
+        except:
+            self.Groups = gdata.apps.groups.service.GroupsService(domain=self.domain)
+            self.Groups.SetClientLoginToken(self.service.current_token.get_token_string())
+            return self.Groups
+    
     def log_in(self):
         """Authorizes the username, domain, and password with Google.  Stores a token in the text file tokens.txt"""
         is_authorized = False
@@ -631,11 +650,116 @@ def update_general():
 
 ## NICKNAME FUNCTIONS ##
 
+def create_nickname(credential, nickname, user_name):
+    log('Creating nickname %s for %s' % (nickname, user_name))
+    credential.service.CreateNickname(user_name, nickname)
 
+def read_nickname(credential, nickname):
+    log('Reading info for nickname %s' % (nickname))
+    result = credential.service.RetrieveNickname(nickname)
+    print 'Nickname %s is under user %s' % (nickname, result.login.user_name)
+
+# Warning: update_nickname is not currently working properly... - JRP, 1/24/11
+def update_nickname(credential, nickname, user_name):
+    """Deletes the previous nickname, and creates a new one."""
+    log('Updating nickname %s to be under %s' % (nickname, user_name))
+    credential.service.DeleteNickname(nickname)
+    credential.service.CreateNickname(user_name, nickname)
+
+def delete_nickname(credential, nickname):
+    log('Deleting nickname %s' % (nickname))
+    credential.service.DeleteNickname(nickname)
 
 ## GROUP FUNCTIONS ##
 
+def create_group(credential, id, name, description, permission=''):
+    log('Creating group %s' % id)
+    # Capitalize the permission parameter
+    assert permission.length>0, 'Invalid permission argument.'
+    permission = permission.lower()
+    permission = permission[0].upper() + permission[1:]
+    group_service = credential.get_groups_object()
+    group_service.CreateGroup(id, name, description, permission)
 
+def read_group(credential, id):
+    log('Creating group %s' % id)
+    group_service = credential.get_groups_object()
+    group = group_service.RetrieveGroup(id)
+    print 'Group id: %s' % group['groupId']
+    print 'Group name: %s' % group['groupName']
+    print 'Description: %s' % group['description']
+    print 'Email permission: %s' % group['emailPermission']
+    print 'Members:'
+    group_members = group_service.RetrieveAllMembers(group['groupId'])
+    for member in group_members:
+        print member['memberId']+','+member['memberType']
+
+def update_group(credential, id, name, description, permission=''):
+    log('Updating group %s' % id)
+    # Capitalize the permission parameter
+    assert permission.length>0, 'Invalid permission argument.'
+    permission = permission.lower()
+    permission = permission[0].upper() + permission[1:]
+    group_service = credential.get_groups_object()
+    group_service.UpdateGroup(id, name, description, permission)
+
+def delete_group(credential, id):
+    log('Deleting group %s' % id)
+    group_service = credential.get_groups_object()
+    group_service.DeleteGroup(id)
+
+def list_groups(credential):
+    log('Listing all groups')
+    group_service = credential.get_groups_object()
+    groups = group_service.RetrieveAllGroups()
+    for group in groups:
+        print '' # new line
+        print 'Group id: %s' % group['groupId']
+        print 'Group name: %s' % group['groupName']
+        print 'Description: %s' % group['description']
+        print 'Email permission: %s' % group['emailPermission']
+
+def list_group_members(credential, id, suspended_users='false'):
+    log('Retrieving members in group %s' % id)
+    suspended_users = str_to_bool(suspended_users)
+    group_service = credential.get_groups_object()
+    members = group_service.RetrieveAllMembers(id, suspended_users)
+    owners = group_service.RetrieveAllOwners(id, suspended_users)
+    for member in members:
+        print member['memberId']+',member'
+    for owner in owners:
+        print owner['email']+',owner'
+    if len(owners) + len(members) == 0:
+        print '(none)'
+
+def list_group_owners(credential, id):
+    log('Retrieving owners of group %s' % id)
+    group_service = credential.get_groups_object()
+    owners = group_service.RetrieveAllOwners(id)
+    for owner in owners:
+        print owner['email']
+    if not len(owners):
+        print '(none)'
+
+def add_member_to_group(credential, user, id):
+    log('Adding member %s to group %s' % (user, id))
+    group_service = credential.get_groups_object()
+    group_service.AddMemberToGroup(user, id)
+
+def remove_member_from_group(credential, user, id):
+    log('Removing member %s from group %s' % (user, id))
+    group_service = credential.get_groups_object()
+    group_service.RemoveMemberFromGroup(user, id)
+
+def add_owner_to_group(credential, user, id):
+    log('Adding owner %s to group %s' % (user, id))
+    group_service = credential.get_groups_object()
+    group_service.AddOwnerToGroup(user, id)
+
+def remove_owner_from_group(credential, user, id):
+    log('Removing owner %s from group %s' % (user, id))
+    group_service = credential.get_groups_object()
+    group_service.RemoveOwnerFromGroup(user, id)
 
 ## SHARED CONTACT FUNCTIONS ##
 
@@ -653,9 +777,50 @@ def update_general():
 
 
 
-## ORGANIZATIONAL UNIT FUNCTIONS ##
+## ORGANIZATION UNIT FUNCTIONS ##
 
+def create_org(credential, name, description='', parent='/', block_inheritance='false'):
+    """Creates an organization unit."""
+    log('Creating organization %s' % name)
+    org_service = credential.get_organization_object()
+    block_inheritance = str_to_bool(block_inheritance)
+    org_service.CreateOrganizationUnit(name, description, parent, block_inheritance)
 
+def update_org(credential, name, new_name='', description='', parent='/', block_inheritance='false', users_to_move=''):
+    """Updates an organization unit."""
+    log('Updating organization %s' % name)
+    org_service = credential.get_organization_object()
+    block_inheritance = str_to_bool(block_inheritance)
+    users_to_move = users_to_move.split(' ')
+    org_service.UpdateOrganizationUnit(name, new_name, description, parent, block_inheritance, users_to_move)
+
+def add_users_to_org(credential, name, users_to_move):
+    """Adds users to an organization unit."""
+    log('Updating organization %s' % name)
+    org_service = credential.get_organization_object()
+    block_inheritance = str_to_bool(block_inheritance)
+    users_to_move = users_to_move.split(' ')
+    org_service.UpdateOrganizationUnit(name, users_to_move=users_to_move)
+
+def read_org(credential, name):
+    """Reads info about an organization unit."""
+    log('Reading organization %s' % name)
+    org_service = credential.get_organization_object()
+    org = org_service.RetrieveOrganizationUnit(name)    
+    print 'Organization unit name: %s' % name
+    print 'Description: %s' % str(org['description'])
+    print 'Parent organization unit: %s' % str(org['parentOrgUnitPath'])
+    print 'Block inheritance: %s' % str(org['blockInheritance'])
+    print 'Users:'
+    users = org_service.RetrieveAllOrganizationUnitUsers(name)
+    for user in users:
+        print '  '+user['orgUserEmail']
+
+def delete_org(credential, name):
+    """Reads info about an organization unit. To access a suborganization, use Name1/Name2."""
+    log('Deleting organization %s' % name)
+    org_service = credential.get_organization_object()
+    org = org_service.DeleteOrganizationUnit(name)    
 
 ## DOCS FUNCTIONS ##
 
@@ -681,6 +846,7 @@ def build_arg_dict(args, case_sensitive=False):
     return dictionary
 
 whitelist_functions = {
+    ## Users ##
     'create_user': create_user,
     'read_user': read_user,
     'update_user': update_user,
@@ -688,6 +854,7 @@ whitelist_functions = {
     'suspend_user': suspend_user,
     'restore_user': restore_user,
     'rename_user': rename_user,
+    ## Email settings ##
     'create_label': create_label,
     'create_filter': create_filter,
     'create_send_as': create_send_as,
@@ -697,7 +864,30 @@ whitelist_functions = {
     'update_imap': update_imap,
     'update_vacation': update_vacation,
     'update_signature': update_signature,
-    'update_language': update_language
+    'update_language': update_language,
+    ## Nicknames ##
+    'create_nickname': create_nickname,
+    'read_nickname': read_nickname,
+    #'update_nickname': update_nickname, # JRP: update_nickname is disabled because it wasn't working properly. I think the commands get issued to quickly to Google, such that Google tries to create a new nickname before fully realizing it deleted the old one.
+    'delete_nickname': delete_nickname,
+    ## Organization units ##
+    'create_org': create_org,
+    'update_org': update_org,
+    'add_users_to_org': add_users_to_org,
+    'read_org': read_org,
+    'delete_org': delete_org,
+    ## Groups ##
+    'create_group': create_group,
+    'read_group': read_group,
+    'update_group': update_group,
+    'delete_group': delete_group,
+    'list_groups': list_groups,
+    'list_group_members': list_group_members,
+    'list_group_owners': list_group_owners,
+    'add_member_to_group': add_member_to_group,
+    'remove_member_from_group': remove_member_from_group,
+    'add_owner_to_group': add_owner_to_group,
+    'remove_owner_from_group': remove_owner_from_group
     }
 
 def execute(args):

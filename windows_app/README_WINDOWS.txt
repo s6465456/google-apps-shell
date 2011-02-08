@@ -1,4 +1,4 @@
-README_MAC.txt
+README_WINDOWS.txt
 
 GASI is a graphical user interface for GAS and GAM.  It allows
 administrators to programmatically execute commands from GAM and GAS
@@ -8,7 +8,7 @@ without having to write a bash script. Some use cases include...
   * Creating resource calendars from a CSV file containing calendar resource information.
   * ...and any other interesting combination of Google Apps API commands.
 
-To run GASI on Mac OS X, double click on gasi.app.
+To run GASI on Windows, double click on gasi.exe.
 
 For more information, see:
     https://code.google.com/p/google-apps-shell
