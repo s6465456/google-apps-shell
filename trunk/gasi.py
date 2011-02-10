@@ -17,17 +17,12 @@
 """Google Apps Shell Interface is a graphical user interface designed to simplify use of the Google Apps related APIs."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys
 import os
 from Tkinter import * # TODO(pickhardt) refactor this to simply "import Tkinter"
-
-SKIP_USERNAME_PROMPT_IN_GAM = True
-import gam
-SKIP_USERNAME_PROMPT_IN_GAM = False
-import gam_commands
 
 import gas
 import gas_commands
@@ -187,20 +182,12 @@ class MyApp:
     label.pack()
     
     help_menu_list = []
-    for gam_entry in gam_commands.commands:
-      if gam_entry!='_TEMPLATE':
-        if 'category' in gam_commands.commands[gam_entry]:
-          command_entry = 'GAM > ' + gam_commands.commands[gam_entry]['category'] + ' > ' + gam_commands.commands[gam_entry]['title']
-        else:
-          command_entry = 'GAM > ' + gam_commands[gam_entry]['title']
-        help_menu_list.append((command_entry,gam_entry))
-    
     for gas_entry in gas_commands.commands:
       if gas_entry!='_TEMPLATE':
         if 'category' in gas_commands.commands[gas_entry]:
-          command_entry = 'GAS > ' + gas_commands.commands[gas_entry]['category'] + ' > ' + gas_commands.commands[gas_entry]['title']
+          command_entry = gas_commands.commands[gas_entry]['category'] + ' > ' + gas_commands.commands[gas_entry]['title']
         else:
-          command_entry = 'GAS > ' + gas_commands[gas_entry]['title']
+          command_entry = gas_commands[gas_entry]['title']
         help_menu_list.append((command_entry,gas_entry))
     
     help_menu_list = sorted(help_menu_list, key=lambda entry: entry[0])
@@ -274,16 +261,13 @@ class MyApp:
       help_with: The specific command to print help details about.
     
     Returns:
-      A function to get called associated with the specific command in GAM.
+      A function to get called associated with the specific command in GAS.
     """
     
     try:
-      help_object = gam_commands.commands[help_with]
+      help_object = gas_commands.commands[help_with]
     except:
-      try:
-        help_object = gas_commands.commands[help_with]
-      except:
-        raise StandardError('HelpFunction could not find the help entry for the command %s' % help_with)
+      raise StandardError('HelpFunction could not find the help entry for the command %s' % help_with)
     
     def HelpForGivenEntry():
       """(This is a function inside a function)
@@ -461,19 +445,18 @@ Examples:
         command_list = [entry for entry in shlex.split(command)]
         sys.stderr.write('[gasi] Executing: '+command)
         self.last_error = '';
-        engine = command_list[0].lower() # either 'gam' or 'gas'
-        if engine=='gam':
-          sys.argv = [sys.argv[0]]
-          sys.argv.extend(command_list[1:])
-          try:
-            gam.execute() # requires arguments passed as sys.argv
-          except StandardError, e:
-            sys.stderr.write(e)
-        else:
-          # assume they are using GAS
+        engine = command_list[0].lower() # the only engine currently supported is 'gas'
+        if engine=='gas':
           gas.execute(command_list[1:])
+        else:
+          # They probably forgot the 'gas' in the syntax.
+          # We will execute the command as if 'gas' were there.
+          # However, this is open to change in the future,
+          # to allow for the possibility of integrating GASI with
+          # other libraries.
+          gas.execute(command_list)
         sys.stderr.write('[gasi] Finished executing: '+command)
-        
+  
   def LoadInput(self, event):
     """Loads an input to the input text from a file."""
     self.input_text.delete('1.0', END)
@@ -494,21 +477,6 @@ Examples:
   
   def LogOut(self, event):
     """Logs out and deletes the token file, if it exists."""
-    # Log out of GAM:
-    
-    # GAM specific code
-    # delete token file
-    token_file_path = gam.getTokenPath()
-    if os.path.exists(token_file_path):
-      os.remove(token_file_path)
-    
-    # delete auth file
-    auth_file_path = gam.getAuthPath()
-    if os.path.exists(auth_file_path):
-      os.remove(auth_file_path)
-    
-    gam.domain = ''
-    
     # Log out of GAS:
     gas.execute(['log_out'])
     
@@ -518,13 +486,11 @@ Examples:
   
   def AutoLogIn(self):
     """Logs in to Google Apps based on the credentials given in the apps object, which is assumed to work successfully."""
-    gam_apps = gam.getAppsObject()
-    # if we get here, then we've successfully logged in to gam
-    
     gas.execute(['log_in'])
     # if we get here, then we've successfully logged in to gas
     
-    self.log_out_label.configure(text='Currently signed in to '+gam_apps.domain)
+    email = gas.get_logged_in_user()
+    self.log_out_label.configure(text='Currently signed in as %s' % email)
     self.log_in_frame.pack_forget()
     self.log_out_frame.pack()
   
@@ -538,15 +504,12 @@ Examples:
     except:
       sys.stderr.write('Username must be of form: name@domain.com')
     
-    # log in to gam
-    gam_apps = gam.getAppsObject(True, username, domain, password)
-    # if we get here, then we've successfully logged in to gam
-    
     # log in to gas    
     gas.execute(['log_in', 'email=%s' % fullUsername, 'password=%s' % password])
     # if we get here, then we've successfully logged in to gas
     
-    self.log_out_label.configure(text='Currently signed in to '+gam_apps.domain)
+    email = gas.get_logged_in_user()
+    self.log_out_label.configure(text='Currently signed in as %s' % email)
     self.log_in_password.configure(text='')
     self.log_in_frame.pack_forget()
     self.log_out_frame.pack()

@@ -2,7 +2,7 @@
 #
 # Documentation for the GAS commands.
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 
 commands = {
 
@@ -31,12 +31,6 @@ Optional parameter change_password will force the user to change their password 
     'usage': 'gas update_user user_name=<name> [new_user_name=<New Name>] [first_name=<First Name>] [last_name=<Last Name>] [password=<Password>] [password_hash_function=SHA-1|MD5] [suspended=true|false] [quota_limit=<quota size>] [change_password=true|false] [admin=true|false] [suspended=true|false] [ip_whitelisted=true|false]',
     'description': """
 Updates the user account for user_name. All parameters except user_name are optional. If you wish to rename the username for this user, set new_user_name.
-
-Google makes the following recommendations when renaming a user account:
-
-    * Before renaming a user, it is recommended that you logout the user from all browser sessions and services. For instance, you can get the user on your support desk telephone line during the rename process to ensure they have logged out. The process of renaming can take up to 10 minutes to propagate across all services.
-    * Google Talk will lose all remembered chat invitations after renaming. The user must request permission to chat with friends again.
-    * When a user is renamed, the old username is retained as a nickname to ensure continuous mail delivery in the case of email forwarding settings and will not be available as a new username. If you prefer not to have the nickname in place after the rename, you'll need to Delete the Nickname 
 """,
     'examples': [
       ('gam update_user user_name=jack first_name=Jack last_name=Johnson password=MovingOut admin=true suspended=false',
@@ -124,6 +118,32 @@ Prints out the current GAS authentication status, telling you whether you are lo
       ]
   },
   
+  'log_in': {
+    'title': 'Log In',
+    'category': 'Authentication',
+    'usage': 'gas log_in email=<email> password=<password>',
+    'description': """
+Logs GAS in to Google. This command should only be used from the command line, and not GASI.
+""",
+    'examples': [
+      ('gas log_in email=admin@altostrat.com password=secret',
+      'This example logs admin in to Google Apps, under the domain altostrat.com.')
+      ]
+  },
+    
+  'log_out': {
+    'title': 'Log Out',
+    'category': 'Authentication',
+    'usage': 'gas log_out',
+    'description': """
+Logs GAS out of Google. This command should only be used from the command line, and not GASI.
+""",
+    'examples': [
+      ('gas log_out',
+      'This example removes the authentication credentials from GAS.')
+      ]
+  },
+  
   'create_label': {
       'title': 'Create Label',
       'category': 'Email Settings',
@@ -155,7 +175,7 @@ Creates a filter on behalf of user_name.  Optional parameters include: mail_from
       'category': 'Email Settings',
       'usage': 'gas create_send_as user_name=<email> name=<name> address=<email> [reply_to=<email>] [make_default=true|false]',
       'description': """
-Creates a send as alias on behalf of user_name. This allows the user user_name to send email as "name <address>" with an optional reply to.
+Creates a send as alias on behalf of user_name. This allows the user user_name to send email as "name (address)" with an optional reply to.
 """,
       'examples': [
         ('create_send_as user_name=tim name="Timothy Johnson" address=timothy@domain.com reply_to=tim@domain.com',
@@ -295,10 +315,10 @@ Deletes a nickname, if it exists.
 
   'create_org': {
       'title': 'Create Organization',
-      'category': 'Organization Settings',
+      'category': 'Organization',
       'usage': 'gas create_org name=<org> description=<description> [parent=<parent_org>] [block_inheritance=true]',
       'description': """
-Creates an organization unit <org> with description <description>.  If parent is specified, the organization is created under the parent.  If block_inheritance is true, the organization does not inherit settings from the parent.
+Creates an organization unit org with a description.  If parent is specified, the organization is created under the parent.  If block_inheritance is true, the organization does not inherit settings from the parent.
 """,
       'examples': [
         ('gas create_org name=canada description="Canadian users"',
@@ -308,7 +328,7 @@ Creates an organization unit <org> with description <description>.  If parent is
 
   'update_org': {
       'title': 'Update Organization',
-      'category': 'Organization Settings',
+      'category': 'Organization',
       'usage': 'gas update_org name=<org> description=<description> [parent=<parent_org>] [block_inheritance=true] [users_to_move=<user_list>]',
       'description': """
 Updates an organization unit with the settings specified.  Optional variable users_to_move contains a space-separated list of users to move to the organization.
@@ -321,7 +341,7 @@ Updates an organization unit with the settings specified.  Optional variable use
 
   'add_users_to_org': {
       'title': 'Add Users to Organization',
-      'category': 'Organization Settings',
+      'category': 'Organization',
       'usage': 'gas add_users_to_org name=<org> users_to_move=<user_list>',
       'description': """
 Adds a list of users to the specified organization.  Optional variable users_to_move contains a space-separated list of users to move to the organization.
@@ -334,7 +354,7 @@ Adds a list of users to the specified organization.  Optional variable users_to_
 
   'read_org': {
       'title': 'Read Organization',
-      'category': 'Organization Settings',
+      'category': 'Organization',
       'usage': 'gas read_org name=<name>',
       'description': """
 Prints information about the organization.
@@ -347,7 +367,7 @@ Prints information about the organization.
 
   'delete_org': {
       'title': 'Delete Organization',
-      'category': 'Organization Settings',
+      'category': 'Organization',
       'usage': 'gas delete_org name=<name>',
       'description': """
 Deletes an organization. The organization must NOT contain any users, otherwise it cannot be deleted.

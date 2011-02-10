@@ -21,7 +21,7 @@
 """Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv
@@ -890,6 +890,10 @@ whitelist_functions = {
     'remove_owner_from_group': remove_owner_from_group
     }
 
+def get_logged_in_user():
+    credential = Credentials('', '')
+    return credential.get_email()
+    
 def execute(args):
     call_function = args[0]
     dictionary = build_arg_dict(args[1:])
