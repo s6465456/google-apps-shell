@@ -9,7 +9,8 @@ This page assumes you have already downloaded and installed GASI. If this is not
 
   # On Mac OS X, double click on gasi.app located in the mac_app folder.
   # On Windows, double click on gasi.exe located in the windows_app directory.
-  # Otherwise, through a command line interface, navigate to the gasi directory. Then execute a command to open gasi.py with Python. This command is typically "python gasi.py"
+  # If the application fails to open, you may not have Python installed. It does not come pre-installed on Windows, for instance. See below for instructions on installing Python.
+  # If you use Linux or another operating system, you can still run GASI through a command line interface.  To do so, navigate to the gasi directory. Then execute a command to open gasi.py with Python. This command is typically "python gasi.py"
 
 If you are not sure if you have Python installed, try running the command "python gasi.py" anyway.  If you don't have Python installed, you can get it at [http://www.python.org/ python.org].
 
