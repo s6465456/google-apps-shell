@@ -118,7 +118,7 @@ gas create_send_as user_name=<email> name=<name> address=<email> [reply_to=<emai
 This example creates a send as alias for tim, allowing him to send as Timothy Johnson with timothy@domain.com.
 
 {{{
-create_send_as user_name=tim name="Timothy Johnson" address=timothy@domain.com reply_to=tim@domain.com
+gas create_send_as user_name=tim name="Timothy Johnson" address=timothy@domain.com reply_to=tim@domain.com
 }}}
 
 == Update Forwarding Mail `(update_forwarding)` ==
