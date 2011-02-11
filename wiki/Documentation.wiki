@@ -1,4 +1,4 @@
-#summary Documentation for GAS version 1.1.4
+#summary Documentation for GAS version 1.1.6
 
 = Documentation =
 This page contains a full listing of GAS commands.
@@ -7,6 +7,42 @@ This page contains a full listing of GAS commands.
 
 
 = Authentication =
+
+== Log In `(log_in)` ==
+
+Logs GAS in to Google. This command should only be used from the command line, and not GASI.
+
+*Usage:*
+
+{{{
+gas log_in email=<email> password=<password>
+}}}
+
+*Example:*
+
+This example logs admin in to Google Apps, under the domain altostrat.com.
+
+{{{
+gas log_in email=admin@altostrat.com password=secret
+}}}
+
+== Log Out `(log_out)` ==
+
+Logs GAS out of Google. This command should only be used from the command line, and not GASI.
+
+*Usage:*
+
+{{{
+gas log_out
+}}}
+
+*Example:*
+
+This example removes the authentication credentials from GAS.
+
+{{{
+gas log_out
+}}}
 
 == Print Authentication `(print_authentication)` ==
 
@@ -476,7 +512,7 @@ gas read_nickname nickname=joey
 ----
 
 
-= Organization Settings =
+= Organization =
 
 == Add Users to Organization `(add_users_to_org)` ==
 
