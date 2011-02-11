@@ -28,20 +28,14 @@ Once authenticated, you should see something like the following:
 
 = Issuing a Simple Command =
 
-The graphical user interface GASI can call functions from both GAS and GAM (version 1.6.1).  To see what commands you can use, either visit the GAM website or click Open Documentation in GASI.
+The graphical user interface GASI can call functions from GAS.  To see what commands you can use, either visit the [https://code.google.com/p/google-apps-shell/wiki/Documentation Documentation] page or click Open Documentation in GASI.
 
 To browse the possible commands, click Open Documentation.
 
-To execute a command, type in the command and click Execute.  Here is an example:
+To execute a command, type in the command and click Execute.  Here is an example of how to rename a user in Google Apps:
 
-[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/simple_command.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/simple_command.png]
+[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/simple_command.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/rename.png]
 
-
-= Issuing a GAS Command =
-
-GASI can execute commands from both the Google Apps Manager (GAM) and the Google Apps Shell (GAS).  Depending on which you use, the syntax will be slightly different.  Here is an example GAS command:
-
-[http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/gas_command.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/gas_command.png]
 
 = Issuing Commands from a Template =
 
