@@ -80,7 +80,7 @@ Here is a screen shot of a compound command:
 
 Issuing commands from templates and issuing compound commands can be used together. For instance, you could create users as well as update their signature with the following compound command:
 
-{{{cas create_user user_name={3} first_name={1} last_name={2} password={4}; gas update_signature user_name={3} signature="My name is {1} {2}."}}}
+{{{gas create_user user_name={3} first_name={1} last_name={2} password={4}; gas update_signature user_name={3} signature="My name is {1} {2}."}}}
 
 Here is a screen shot illustrating this concept:
 
