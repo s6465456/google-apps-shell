@@ -54,7 +54,7 @@ Adrian, Peterson, apeterson
 
 You could then set their signatures with the command:
 
-{{{gam user {3}@altostrat.com signature "My name is {1} {2}. Email me at {3}@altostrat.com"}}}
+{{{gas update_signature user_name={3}@altostrat.com signature="My name is {1} {2}. Email me at {3}@altostrat.com"}}}
 
 Executing this command would update both signatures.
 
@@ -65,11 +65,11 @@ Here is a screen shot illustrating commands built from templates:
 
 = Issuing Compound Commands =
 
-GASI can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to move a user between multiple domains, as well as update their signature, you could type the following in the execute field:
+GASI can execute multiple commands sequentially. To execute multiple commands, put a semicolon in between each command. For instance, if you wish to create a nickname, as well as update a user's language setting, you could the execute field:
 
-{{{gam multi move john@altostrat.com john@betastrat.com; gam user john@betastrat.com signature "My email address is now john@betastrat.com"}}}
+{{{gas create_nickname nickname=mickey user_name=michael; gas update_language user_name=michael language=en-GB"}}}
 
-Executing this command would move the user's between multiple domains, as well as update their signature to reflect their new email address.
+Executing this command would create a nickname "mickey" as well as set Michael's language to en-GB.
 
 Here is a screen shot of a compound command:
 
@@ -78,9 +78,9 @@ Here is a screen shot of a compound command:
 
 = Issuing Compound Commands from a Template =
 
-Issuing commands from templates and issuing compound commands can be used together. For instance, using the previous examples, you could move users between multiple domains and update their signature with the following compound command:
+Issuing commands from templates and issuing compound commands can be used together. For instance, you could create users as well as update their signature with the following compound command:
 
-{{{gam multi move {3}@altostrat.com {3}@betastrat.com; gam user {3}@betastrat.com signature "My name is {1} {2} and my email address is now {3}@betastrat.com"}}}
+{{{cas create_user user_name={3} first_name={1} last_name={2} password={4}; gas update_signature user_name={3} signature="My name is {1} {2}."}}}
 
 Here is a screen shot illustrating this concept:
 
@@ -91,6 +91,6 @@ Here is a screen shot illustrating this concept:
 
 When an error occurs, GASI will output the error code underneath the execution bar.  The full error code can be viewed by clicking the View Last Error button.  Further, GASI logs all executing details in gas_details_log.txt.
 
-To understand the error codes, look at the last error and try to interpret what it means. For example, in the following screen shot, the error is an AppsForYourDomainException stating there is an invalid input walter2 with the reason EntityDoesNotExist.  In English, what this means is that the user walter2 does not exist in Google Apps, so it cannot be deleted.
+To understand the error codes, look at the last error interpret the reason listed. For example, in the following screen shot, the error is an AppsForYourDomainException stating there is an invalid input walter2 with the reason EntityDoesNotExist.  In English, what this means is that the user walter2 does not exist in Google Apps, so it cannot be deleted.
 
 [http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/error.png http://google-apps-shell.googlecode.com/svn/trunk/wiki/images/error.png]
