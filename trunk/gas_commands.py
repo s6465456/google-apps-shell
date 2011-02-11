@@ -178,7 +178,7 @@ Creates a filter on behalf of user_name.  Optional parameters include: mail_from
 Creates a send as alias on behalf of user_name. This allows the user user_name to send email as "name (address)" with an optional reply to.
 """,
       'examples': [
-        ('create_send_as user_name=tim name="Timothy Johnson" address=timothy@domain.com reply_to=tim@domain.com',
+        ('gas create_send_as user_name=tim name="Timothy Johnson" address=timothy@domain.com reply_to=tim@domain.com',
         'This example creates a send as alias for tim, allowing him to send as Timothy Johnson with timothy@domain.com.')
         ]
   },
