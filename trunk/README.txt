@@ -13,9 +13,19 @@ without having to write a bash script. Some use cases include...
   * Moving every user from one domain to another, then removing the old user alias.
   * ...and many other interesting combination of Google Apps API commands.
 
-To run GASI on Mac OS X, double click on the gasi.app file in the mac_app folder.
+GASI comes with an executable for certain computers. Depending on whether your
+computer has the same specs as the computer where the executable was created, it
+may work for you. In the future, an installer to build an executable for your
+computer is planned.
 
-To run GASI on Windows, double click on the gasi.exe file in the windows_app directory.
+The Mac OS X executable is found in the mac_app folder. To use it,
+double click on the gasi.app file in the mac_app folder.
+
+The Windows executable is found in the windows_app directory. To use it,
+double click on the gasi.exe file in the windows_app directory.
+
+If your computer cannot run your GASI executable, you can still use GASI,
+by calling it from the command line.  Here's how.
 
 To run GAS or GASI from any computer with Python installed, you can run the
 gasi.py file with Python.  This can be done by navigating to this directory
