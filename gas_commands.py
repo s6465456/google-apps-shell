@@ -1,8 +1,13 @@
 # gas_commands.py
 #
 # Documentation for the GAS commands.
+#
+# This documentation is used in GASI and on the website.
+# The website's documentation can be programmatically generated
+# from this file by using gas_docs_builder.py
+#
 
-__version__ = '1.1.6'
+__version__ = '1.1.7'
 
 commands = {
 
@@ -105,6 +110,19 @@ Restores a user (from a suspended user state).
       ]
   },
 
+  'print_users': {
+    'title': 'Print All Users',
+    'category': 'Users',
+    'usage': 'gas print_users',
+    'description': """
+Prints the full email address of all users in the Google Apps account.
+""",
+    'examples': [
+      ('gas print_users',
+      'This example prints all users in the Google Apps account.')
+      ]
+  },
+  
   'print_authentication': {
     'title': 'Print Authentication',
     'category': 'Authentication',
