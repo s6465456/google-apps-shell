@@ -21,7 +21,7 @@
 """Google Apps Shell is a script allowing Google Apps administrators to issue simple commands to their Apps domain."""
 
 __author__ = 'jeffpickhardt@google.com (Jeff Pickhardt)'
-__version__ = '1.1.6'
+__version__ = '1.1.7'
 __license__ = 'Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)'
 
 import sys, os, time, datetime, random, cgi, socket, urllib, csv
@@ -421,6 +421,12 @@ def delete_user(credential, user_name, no_rename='false'):
         # reset domain to the old domain
         credential.service.domain = old_domain
 
+def print_users(credential):
+    """Prints a list of all users in the organization."""
+    org_service = credential.get_organization_object()
+    all_users = org_service.RetrieveAllOrganizationUsers()
+    for user in all_users:
+        print user['orgUserEmail']
 
 ## USER EMAIL SETTING FUNCTIONS ##
 
@@ -855,6 +861,7 @@ whitelist_functions = {
     'suspend_user': suspend_user,
     'restore_user': restore_user,
     'rename_user': rename_user,
+    'print_users': print_users,
     ## Email settings ##
     'create_label': create_label,
     'create_filter': create_filter,
