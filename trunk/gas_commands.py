@@ -33,14 +33,14 @@ Optional parameter change_password will force the user to change their password 
   'update_user': {
     'title': 'Update (and Rename) a User',
     'category': 'Users',
-    'usage': 'gas update_user user_name=<name> [new_user_name=<New Name>] [first_name=<First Name>] [last_name=<Last Name>] [password=<Password>] [password_hash_function=SHA-1|MD5] [suspended=true|false] [quota_limit=<quota size>] [change_password=true|false] [admin=true|false] [suspended=true|false] [ip_whitelisted=true|false]',
+    'usage': 'gas update_user user_name=<name> [new_user_name=<New Name>] [first_name=<First Name>] [last_name=<Last Name>] [password=<Password>] [password_hash_function=SHA-1|MD5] [quota_limit=<quota size>] [change_password=true|false] [admin=true|false] [suspended=true|false] [ip_whitelisted=true|false]',
     'description': """
 Updates the user account for user_name. All parameters except user_name are optional. If you wish to rename the username for this user, set new_user_name.
 """,
     'examples': [
-      ('gam update_user user_name=jack first_name=Jack last_name=Johnson password=MovingOut admin=true suspended=false',
+      ('gas update_user user_name=jack first_name=Jack last_name=Johnson password=MovingOut admin=true suspended=false',
       'This example updates a user account, setting the first_name, last_name and password and making them an administrator.'),
-      ('gam update_user user_name=jeffrey new_user_name=jeff',
+      ('gas update_user user_name=jeffrey new_user_name=jeff',
       'This example renames the user jeffrey to jeff.')
       ]
   },
@@ -544,7 +544,7 @@ Removes an owner from a Google Group
   '_TEMPLATE': {
       'title': '',
       'category': '',
-      'usage': '',
+      'usage': 'gas _TEMPLATE',
       'description': """
 
 """,
