@@ -38,7 +38,8 @@ from hashlib import sha1
 import getpass
 
 ## VARIOUS HELPER FUNCTIONS ##
-def str_to_bool(string, case_sensitive=False, true_words=['true', 'on'], false_words=['false', 'off']):
+def str_to_bool(string, case_sensitive=False, true_words=['true', 'on'],
+                false_words=['false', 'off']):
     if not case_sensitive:
         string = string.lower()
     if string in true_words:
@@ -46,7 +47,31 @@ def str_to_bool(string, case_sensitive=False, true_words=['true', 'on'], false_w
     elif string in false_words:
         return False
     else:
-        raise Exception('Could not convert %s to a boolean.' % string)    
+        raise Exception('Could not convert %s to a boolean.' % string)
+
+def expand_cmd_template(cmds_template, entries=None):
+    if not entries:
+        entries = ['']
+
+    # This could be done in a single expression using a bunch
+    # of generators, but that would be harder to read :-)
+
+    cmds = []
+
+    for entry in entries:
+        for cmd in cmds_template:
+            cmd = cmd.strip()
+            if not cmd:
+                continue
+
+            for index, col in enumerate(entry):
+                # Replace {x} with the x^th column.
+                # Note that columns are 1-indexed for humans...
+                cmd = cmd.replace('{%d}' % (index+1), col.strip())
+
+            cmds.append(cmd)
+
+    return cmds
 
 ## CREDENTIALS / AUTHENTICATION RELATED STUFF ##
 class Credentials:
@@ -147,15 +172,17 @@ class Credentials:
                 service = gdata.apps.service.AppsService(domain=line_domain)
                 service.SetClientLoginToken(line_token)
                 service.RetrieveUser(line_username) # test that we're successfully authorized
-                
-                is_authorized = True
-                self.domain = line_domain
-                self.username = line_username
-                self.token=line_token
             except gdata.apps.service.AppsForYourDomainException, e:
                 pass
             except socket.error, e:
                 raise Exception("Failed to connect to Google's servers.")
+            else:
+                # Successful login.
+                is_authorized = True
+                self.domain = line_domain
+                self.username = line_username
+                self.token = line_token
+
         
         if not is_authorized:
             service = gdata.apps.service.AppsService(email=self.get_email(), domain=self.domain, password=self.password)
@@ -166,14 +193,18 @@ class Credentials:
             except gdata.service.BadAuthentication, e:
                 raise Exception("Invalid username and password combination. Please try again.")
             except gdata.apps.service.AppsForYourDomainException, e:
-                raise Exception ("Either the user you entered is not a Google Apps Administrator or the Provisioning API is not enabled for your domain. Please see: http://www.google.com/support/a/bin/answer.py?hl=en&answer=60757")
+                raise Exception ("Either the user you entered is not a Google "
+                                 "Apps Administrator or the Provisioning API is "
+                                 "not enabled for your domain. Please see: "
+                                 "http://www.google.com/support/a/bin/answer.py?hl=en&answer=60757")
             except socket.error, e:
                 raise Exception("Failed to connect to Google's servers.")
             
             self.token = service.current_token.get_token_string()
             
             token_file = open(self.token_path, 'a')
-            token_file.write("\n"+time.asctime() + ',log_in,' + self.username + ',' + self.domain + ',' + self.token)
+            token_file.write("\n%s,log_in,%s,%s,%s" %
+                             (time.asctime(), self.username, self.domain, self.token))
             token_file.close()
             
         self.service = service
@@ -244,7 +275,7 @@ def create_user(credential, user_name, first_name, last_name, password, password
         elif e.reason == 'UserDeletedRecently':
             raise Exception('UserDeletedRecently error. '+user_name+" was recently deleted within five days. You'll need to wait five days before a user can be created or renamed to this name.")
         else:
-            raise StandardError('An error occurred: '+e.reason)        
+            raise StandardError('An error occurred: '+e.reason)
     
     
     if old_domain:
@@ -280,28 +311,16 @@ def update_user(credential, user_name, new_user_name=None, first_name=None, last
         user.login.hash_function_name = password_hash_function
     
     if admin!=None:
-        if not admin:
-            user.login.admin = 'false'
-        else:
-            user.login.admin = 'true'
+        user.login.admin = 'true' if admin else 'false'
     
     if suspended!=None:
-        if not suspended:
-            user.login.suspended = 'false'
-        else:
-            user.login.suspended = 'true'
+        user.login.suspended = 'true' if suspended else 'false'
     
     if ip_whitelisted!=None:
-        if not ip_whitelisted:
-            user.login.ip_whitelisted = 'false'
-        else:
-            user.login.ip_whitelisted = 'true'
+        user.login.ip_whitelisted = 'true' if ip_whitelisted else 'false'
     
     if change_password!=None:
-        if not ip_whitelisted:
-            user.login.change_password = 'false'
-        else:
-            user.login.change_password = 'true'
+        user.login.change_password = 'true' if change_password else 'false'
     
     log('Updating %s' % user_name)
     try:
@@ -666,6 +685,11 @@ def read_nickname(credential, nickname):
     result = credential.service.RetrieveNickname(nickname)
     print 'Nickname %s is under user %s' % (nickname, result.login.user_name)
 
+def retrieve_nicknames(credential, user_name):
+    log('Reading all nicknames for %s' % (user_name))
+    nicks = credential.service.RetrieveNicknames(user_name)
+    print nicks
+
 # Warning: update_nickname is not currently working properly... - JRP, 1/24/11
 def update_nickname(credential, nickname, user_name):
     """Deletes the previous nickname, and creates a new one."""
@@ -682,7 +706,7 @@ def delete_nickname(credential, nickname):
 def create_group(credential, id, name, description, permission=''):
     log('Creating group %s' % id)
     # Capitalize the permission parameter
-    assert permission.length>0, 'Invalid permission argument.'
+    assert len(permission) > 0, 'Invalid permission argument.'
     permission = permission.lower()
     permission = permission[0].upper() + permission[1:]
     group_service = credential.get_groups_object()
@@ -704,7 +728,7 @@ def read_group(credential, id):
 def update_group(credential, id, name, description, permission=''):
     log('Updating group %s' % id)
     # Capitalize the permission parameter
-    assert permission.length>0, 'Invalid permission argument.'
+    assert len(permission) > 0, 'Invalid permission argument.'
     permission = permission.lower()
     permission = permission[0].upper() + permission[1:]
     group_service = credential.get_groups_object()
@@ -805,7 +829,6 @@ def add_users_to_org(credential, name, users_to_move):
     """Adds users to an organization unit."""
     log('Updating organization %s' % name)
     org_service = credential.get_organization_object()
-    block_inheritance = str_to_bool(block_inheritance)
     users_to_move = users_to_move.split(' ')
     org_service.UpdateOrganizationUnit(name, users_to_move=users_to_move)
 
@@ -827,7 +850,7 @@ def delete_org(credential, name):
     """Reads info about an organization unit. To access a suborganization, use Name1/Name2."""
     log('Deleting organization %s' % name)
     org_service = credential.get_organization_object()
-    org = org_service.DeleteOrganizationUnit(name)    
+    org = org_service.DeleteOrganizationUnit(name)
 
 ## DOCS FUNCTIONS ##
 
@@ -876,6 +899,7 @@ whitelist_functions = {
     ## Nicknames ##
     'create_nickname': create_nickname,
     'read_nickname': read_nickname,
+    'retrieve_nicknames': retrieve_nicknames,
     #'update_nickname': update_nickname, # JRP: update_nickname is disabled because it wasn't working properly. I think the commands get issued to quickly to Google, such that Google tries to create a new nickname before fully realizing it deleted the old one.
     'delete_nickname': delete_nickname,
     ## Organization units ##
@@ -902,7 +926,7 @@ def get_logged_in_user():
     credential = Credentials('', '')
     return credential.get_email()
     
-def execute(args):
+def execute(args, credential=None):
     call_function = args[0]
     dictionary = build_arg_dict(args[1:])
     
@@ -918,7 +942,8 @@ def execute(args):
     elif call_function=='print_authentication':
         print_authentication()
     else:
-        credential = Credentials('', '')
+        if not credential:
+            credential = Credentials('', '')
         if call_function in whitelist_functions:
             whitelist_functions[call_function](credential, **dictionary)
         else:
